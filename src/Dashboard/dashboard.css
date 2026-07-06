@@ -1,0 +1,433 @@
+body{
+  /* background: #FFEFEF; */
+}
+
+.dashboard {
+  padding: 20px;
+  max-width: 1200px;
+  margin: auto;
+}
+
+.content {
+  display: flex;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.rating-stars {
+  font-size: 24px;
+  display: flex;
+  cursor: pointer;
+  gap: 5px;
+}
+
+
+
+
+
+.dashboardBg {
+  display: flex;
+  flex-direction: column; /* Make it vertical */
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  margin: 0 auto; /* Center the divs */
+}
+
+.mobdash {
+  margin-left: 0;
+}
+/* Responsive Styles */
+
+/* Tablet View (768px and below) */
+@media (min-width: 768px) {
+  .dashboard {
+    padding: 10px;
+  }
+  
+  .content {
+    flex-direction: column; /* Stack elements vertically */
+    gap: 15px;
+  }
+
+  .rating-stars {
+    font-size: 20px; /* Reduce size for smaller screens */
+  }
+
+ 
+  .dashboardBg {
+    margin-bottom: 20px;
+    padding: 10px; /* Adjust padding for smaller screens */
+  }
+}
+
+
+
+/* Mobile View (576px and below) */
+@media (max-width: 576px) {
+  body {
+    font-size: 13px;
+  }
+
+  .ag-paging-row-summary-panel{
+    display: none;
+  }
+
+  .dashboard {
+    padding: 5px;
+  }
+
+  .content {
+    gap: 10px;
+  }
+
+  .rating-stars {
+    font-size: 18px;
+  }
+
+ 
+
+  .dashboardBg {
+    padding: 5px;
+  }
+}
+
+/* Large Laptop View (992px and below) */
+@media (max-width: 992px) {
+  .dashboard {
+    padding: 15px;
+  }
+
+  .content {
+    gap: 15px;
+  }
+
+  .rating-stars {
+    font-size: 22px;
+  }
+
+ 
+  .dashboardBg {
+    padding: 18px;
+  }
+}
+
+/* Extra Small Mobile View (375px and below) */
+@media (max-width: 375px) {
+  .rating-stars {
+    font-size: 16px;
+  }
+
+  .dashboardBg {
+    padding: 5px;
+  }
+
+
+}
+
+
+
+/* CSS to show only on mobile (small screens) */
+.mobile-only {
+  display: block;
+}
+
+@media (min-width: 800px) {
+  .mobile-only {
+    display: none;
+  }
+  .ag-picker-field .ag-labeled .ag-label-align-left .ag-select 
+  .ag-wrapper .ag-picker-field-wrapper .ag-picker-collapsed .ag-paging-row-summary-panel{
+    
+    display: none;
+
+  }
+}
+
+
+.cell-good {
+  background-color: #4CAF50; /* Darker green */
+  border-radius:50px;
+}
+
+.cell-average {
+  background-color: #FFD700; 
+  border-radius:50px;
+}
+
+.cell-poor {
+  background-color: #FF0000; /* Darker red */
+  color:#fff;
+  border-radius:50px;
+}
+
+.chart{
+  /* background-color: #FFF7FC; */
+  background-color: #FFF7FC;
+}
+
+
+
+
+/* Dashboard.css */
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  font-family: Arial, sans-serif;
+}
+
+.card h2 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.card p {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+
+.custom-audio-player {
+  width: 100%;              
+  max-width: 100%;            
+  height: 30px;             
+  border-radius: 5px;       
+  border: 1px solid #ddd;     
+  background-color: #f7f7f7;  
+  margin: 5px 0;            
+}
+
+/* Add custom controls style for the audio */
+.custom-audio-player::-webkit-media-controls-panel {
+  background-color: #f7f7f7;
+}
+
+.custom-audio-player::-webkit-media-controls-play-button {
+  background-color: #4CAF50; 
+}
+
+.custom-audio-player::-webkit-media-controls-volume-slider {
+  background-color: #ddd;    
+}
+
+
+.dropdown {
+  position: relative;
+}
+
+/* Dropdown button styling */
+.dropdown-btn {
+  background-color: none;
+  background: 0;
+  color: rgb(0, 0, 0);
+  border: none;
+  padding: 0;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  border-radius: 5px;
+}
+
+.dropdown-btn:hover{
+  background-color:none;
+  background: none;
+  border:none;
+  box-shadow:none
+}
+
+/* SVG Icon inside the button */
+.dropdown-btn svg {
+  margin-left: 50px;
+  width: 25px;
+  height: 25px;
+ 
+}
+
+/* The dropdown menu (hidden by default) */
+.dropdown-content {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 160px;
+  background-color: white;
+  border: 1px solid #ddd;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+  z-index: 1;
+}
+
+/* Dropdown items styling */
+.dropdown-content a {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: fixed;
+}
+
+.dropdown-content a:hover {
+  background-color: rgb(188, 188, 188);
+}
+
+/* Show the dropdown menu on hover */
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+
+.custom-card {
+  width: 100%;
+  height: auto;
+  min-height: 140px;
+  max-width: 100%;
+}
+
+.fixed-card {
+  width: 100%;
+  max-width: 440px;
+  height: 200px;
+  background-color: #fff6fb;
+  border-radius: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 25px;
+  position: relative;
+  box-shadow: 0 2px 2px rgba(0,0,0,0.1);
+  /* border: 1px solid #333; Black border */
+  margin-bottom: 5px;
+  flex-direction: row;
+}
+
+.card-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  flex: 1;
+}
+
+.card-content h2 {
+  font-size: 28px;
+  font-weight: bold;
+  margin: 0;
+}
+
+.card-content p {
+  font-size: 16px;
+  font-weight: 500;
+  margin: 4px 0;
+  word-wrap: break-word;
+  max-width: 220px;
+  text-align: left;
+}
+
+.card-img {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 80px;
+  width: 80px;
+}
+
+.card-img img {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  border-radius: 12px;
+}
+
+/* Three-dot dropdown */
+
+.dropdown-btn-container {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1;
+}
+
+.dropdown-content {
+  position: absolute;
+  top: 40px;
+  right: 10px;
+  background-color: white;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  padding: 10px;
+  border-radius: 8px;
+  z-index: 100;
+}
+
+.dropdown-content a {
+  display: block;
+  padding: 5px 10px;
+  text-decoration: none;
+  color: #333;
+  font-size: 14px;
+}
+
+.dropdown-content a:hover {
+  background-color: #f0f0f0;
+}
+
+/* Media Query for Mobile */
+@media (max-width: 768px) {
+  .fixed-card {
+    flex-direction: column;
+    align-items: center;
+    height: auto;
+    text-align: center;
+    padding: 20px;
+  }
+
+  .card-content {
+    align-items: center;
+  }
+
+  .card-content p {
+    text-align: center;
+    max-width: 100%;
+  }
+
+  .dropdown {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+  }
+}
+
+.dropdown-hover {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-content-hover {
+  display: none;
+  position: absolute;
+  top: 35px;
+  right: 0;
+  background-color: white;
+  min-width: 160px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  padding: 8px;
+  border-radius: 8px;
+  z-index: 999;
+}
+
+.dropdown-hover:hover .dropdown-content-hover {
+  display: block;
+}
+
+.dropdown-content-hover a {
+  display: block;
+  padding: 6px 12px;
+  color: #333;
+  text-decoration: none;
+  font-size: 14px;
+  border-radius: 4px;
+}
+
+.dropdown-content-hover a:hover {
+  background-color: #f0f0f0;
+}
