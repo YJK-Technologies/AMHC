@@ -5,7 +5,9 @@
 // module.exports = config;
 
 const config = {
-  apiBaseUrl: 'http://95.216.47.253:5503'
+  // apiBaseUrl: 'http://95.216.47.253:5503'
+  apiBaseUrl: 'https://erpdev.yjktechnologies.com:5503'
+  // apiBaseUrl: 'http://localhost:5503'
 };
 
 module.exports = config;
