@@ -82,6 +82,7 @@ router.get("/getDashboardPlan", dataController.getDashboardPlan)
 router.post("/GetSndnoData", dataController.GetSndnoData)
 router.post("/getDashboardCM", dataController.getDashboardCM)
 router.post("/getDashboardLM", dataController.getDashboardLM)
+router.get("/whatsapp-webhook", dataController.verifyWhatsAppWebhook);
 
 
 module.exports = router;
