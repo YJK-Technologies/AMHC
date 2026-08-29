@@ -2372,6 +2372,39 @@ const getDashboardLM = async (req, res) => {
 };
 //Code Ended by pavun on 0-07-25
 
+//Code Added By Pavun on 29-08-2026
+const verifyWhatsAppWebhook = async (req, res) => {
+  try {
+    // Replace with your actual token or use process.env.MY_VERIFY_TOKEN
+    const MY_VERIFY_TOKEN = "EAASZCxkvqHAgBSZAl5GTtkJRqT7guqT1ZBGr1fDiXataVqfppnRByJAzGPdiqfFm5HfOl9meKb8NcWu4ZAgAbYbZALZCBwbeXsvVjePOAO5lZBp3WHeZAVWm2CykceyrDWDYACj5qHfZBsFpAuJNOP4oufqEOTAEmyKCw6Hgf2Ns8BWMQW7vVdFjpGQikA1Lv50SBCAZDZD"; 
+
+    // Meta sends these query parameters
+    let mode = req.query["hub.mode"];
+    let token = req.query["hub.verify_token"];
+    let challenge = req.query["hub.challenge"];
+
+    // Check if the mode and token are present
+    if (mode && token) {
+      // If the token matches your secret password
+      if (mode === "subscribe" && token === MY_VERIFY_TOKEN) {
+        console.log("WEBHOOK_VERIFIED");
+        // YOU MUST RETURN THE CHALLENGE NUMBER to Meta
+        res.status(200).send(challenge);
+      } else {
+        // If passwords don't match, send Forbidden error
+        res.sendStatus(403);
+      }
+    } else {
+      // Send a bad request error if parameters are missing
+      res.status(400).send("Bad Request: Missing parameters"); 
+    }
+  } catch (err) {
+    console.error("Webhook Error:", err);
+    res.status(500).send(err.message || "Internal Server Error");
+  }
+};
+//Code Ended By Pavun on 29-08-2026
+
 module.exports = {
   login,
   getStatus,
@@ -2445,5 +2478,6 @@ module.exports = {
   getDashboardPlan,
   GetSndnoData,
   getDashboardCM,
-  getDashboardLM
+  getDashboardLM,
+  verifyWhatsAppWebhook
 };
