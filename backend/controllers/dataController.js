@@ -2376,7 +2376,7 @@ const getDashboardLM = async (req, res) => {
 const verifyWhatsAppWebhook = async (req, res) => {
   try {
     // Replace with your actual token or use process.env.MY_VERIFY_TOKEN
-    const MY_VERIFY_TOKEN = "EAASZCxkvqHAgBSZAl5GTtkJRqT7guqT1ZBGr1fDiXataVqfppnRByJAzGPdiqfFm5HfOl9meKb8NcWu4ZAgAbYbZALZCBwbeXsvVjePOAO5lZBp3WHeZAVWm2CykceyrDWDYACj5qHfZBsFpAuJNOP4oufqEOTAEmyKCw6Hgf2Ns8BWMQW7vVdFjpGQikA1Lv50SBCAZDZD"; 
+    const MY_VERIFY_TOKEN = "EAAYV5kdZCTpIBST5AboKpquwDhbgbM5TmeRKGil7xOkZB7ds2GRSJeZASfXjjDnbeoub9JZCOCZADV4OzrMnDoa2gh3AYrIuFq1JkgGgFkI7gpMx2Mo9aHDxQKIrubk4ZAwVFCjAzNaNZC5BdB4hVx1WovQoK2yUfFGJZAGc8xRAZBczgIXZBnUz9eZC3Wk4fEmJgZDZD"; 
 
     // Meta sends these query parameters
     let mode = req.query["hub.mode"];
