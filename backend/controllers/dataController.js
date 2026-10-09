@@ -1770,7 +1770,7 @@ const GenderChart = async (req, res) => {
       .input("mode", sql.NVarChar, mode)
       .input("CustomStartDate", sql.NVarChar, CustomStartDate)
       .input("CustomEndDate", sql.NVarChar, CustomEndDate)
-      .query(`EXEC sp_dashboard_gender_chart @mode,@CustomStartDate,@CustomEndDate`);
+      .query(`EXEC sp_dashboard_gender_chart_test @mode,@CustomStartDate,@CustomEndDate`);
     if (result.recordset.length > 0) {
       res.status(200).json(result.recordset); // 200 OK if data is found
     } else {
@@ -1788,7 +1788,7 @@ const GetdashpatientCount = async (req, res) => {
     const result = await pool
       .request()
       .input("mode", sql.NVarChar, "PC")
-      .query(`EXEC sp_dashboard_patient_count @mode,''`);
+      .query(`EXEC sp_dashboard_patient_count_test @mode,''`);
     if (result.recordsets && result.recordsets.length > 0 && result.recordsets[0].length > 0) {
       const data = {
         TPCM: result.recordsets[0],
@@ -1810,7 +1810,7 @@ const GetdashfeedpatientCount = async (req, res) => {
     const result = await pool
       .request()
       .input("mode", sql.NVarChar, "FC")
-      .query(`EXEC sp_dashboard_patient_count @mode,''`);
+      .query(`EXEC sp_dashboard_patient_count_test @mode,''`);
     if (result.recordsets && result.recordsets.length > 0 && result.recordsets[0].length > 0) {
       const data = {
         TPCM: result.recordsets[0],
@@ -1835,7 +1835,7 @@ const getdashbestdept = async (req, res) => {
       .request()
       .input("mode", sql.NVarChar, "BD")
       .input("plans", sql.NVarChar, plans)
-      .query(`EXEC sp_dashboard_patient_count @mode,@plans`);
+      .query(`EXEC sp_dashboard_patient_count_test @mode,@plans`);
     if (result.recordset.length > 0) {
       res.status(200).json(result.recordset); // 200 OK if data is found
     } else {
@@ -1856,7 +1856,7 @@ const getdashpoordept = async (req, res) => {
       .request()
       .input("mode", sql.NVarChar, "PD")
       .input("plans", sql.NVarChar, plans)
-      .query(`EXEC sp_dashboard_patient_count @mode,@plans`);
+      .query(`EXEC sp_dashboard_patient_count_test @mode,@plans`);
     if (result.recordset.length > 0) {
       res.status(200).json(result.recordset); // 200 OK if data is found
     } else {
