@@ -524,7 +524,7 @@ const Report = () => {
     //  await new Promise(resolve => setTimeout(resolve, 10000));
     try {
       // const feedbackLink = `https://amhc.yjktechnologies.com:3000/Feedback?data=${encodedData}`;
-      const feedbackLink = `https://erpdev.yjktechnologies.com:3016//Feedback?data=${encodedData}`;
+      const feedbackLink = `https://erpdev.yjktechnologies.com:3016/Feedback?data=${encodedData}`;
 
       const response = await fetch(`${config.apiBaseUrl}/SMS`, {
         method: "POST",
