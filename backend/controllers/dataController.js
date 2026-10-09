@@ -354,108 +354,108 @@ const getGender = async (req, res) => {
   }
 };
 
-const addformdata = async (req, res) => {
-  const {
-    id,
-    patient_name,
-    checkup_date,
-    phone_no,
-    department,
-    rating,
-    feedback_comments,
-    feedback_date,
-    staff_member,
-    resolved_status,
-    created_by,
-    modified_by,
-    tempstr1,
-    tempstr2,
-    tempstr3,
-    tempstr4,
-    datetime1,
-    datetime2,
-    datetime3,
-    datetime4,
-  } = req.body;
+// const addformdata = async (req, res) => {
+//   const {
+//     id,
+//     patient_name,
+//     checkup_date,
+//     phone_no,
+//     department,
+//     rating,
+//     feedback_comments,
+//     feedback_date,
+//     staff_member,
+//     resolved_status,
+//     created_by,
+//     modified_by,
+//     tempstr1,
+//     tempstr2,
+//     tempstr3,
+//     tempstr4,
+//     datetime1,
+//     datetime2,
+//     datetime3,
+//     datetime4,
+//   } = req.body;
 
-  try {
-    const pool = await sql.connect(dbConfig);
+//   try {
+//     const pool = await sql.connect(dbConfig);
 
-    const result = await pool.request()
-      .input("mode", sql.NVarChar, "I")
-      .input("id", sql.Int, id)
-      .input("patient_name", sql.NVarChar, patient_name)
-      .input("checkup_date", sql.Date, checkup_date)
-      .input("phone_no", sql.NVarChar, phone_no)
-      .input("department", sql.NVarChar, department)
-      .input("rating", sql.Int, rating)
-      .input("feedback_comments", sql.Text, feedback_comments)
-      .input("feedback_date", sql.Date, feedback_date)
-      .input("staff_member", sql.NVarChar, staff_member)
-      .input("resolved_status", sql.TinyInt, resolved_status)
-      .input("created_by", sql.NVarChar, created_by)
-      .input("modified_by", sql.NVarChar, modified_by)
-      .input("tempstr1", sql.NVarChar, tempstr1)
-      .input("tempstr2", sql.NVarChar, tempstr2)
-      .input("tempstr3", sql.NVarChar, tempstr3)
-      .input("tempstr4", sql.NVarChar, tempstr4)
-      .input("datetime1", sql.NVarChar, datetime1)
-      .input("datetime2", sql.NVarChar, datetime2)
-      .input("datetime3", sql.NVarChar, datetime3)
-      .input("datetime4", sql.NVarChar, datetime4)
-      .query(`EXEC sp_Feedback_Form @mode,0,@patient_name,@checkup_date,@phone_no,@department,@rating,@feedback_comments,@feedback_date,@staff_member,@resolved_status,'', @created_by,@modified_by, @tempstr1, @tempstr2, @tempstr3, @tempstr4, @datetime1, @datetime2, @datetime3, @datetime4`);
+//     const result = await pool.request()
+//       .input("mode", sql.NVarChar, "I")
+//       .input("id", sql.Int, id)
+//       .input("patient_name", sql.NVarChar, patient_name)
+//       .input("checkup_date", sql.Date, checkup_date)
+//       .input("phone_no", sql.NVarChar, phone_no)
+//       .input("department", sql.NVarChar, department)
+//       .input("rating", sql.Int, rating)
+//       .input("feedback_comments", sql.Text, feedback_comments)
+//       .input("feedback_date", sql.Date, feedback_date)
+//       .input("staff_member", sql.NVarChar, staff_member)
+//       .input("resolved_status", sql.TinyInt, resolved_status)
+//       .input("created_by", sql.NVarChar, created_by)
+//       .input("modified_by", sql.NVarChar, modified_by)
+//       .input("tempstr1", sql.NVarChar, tempstr1)
+//       .input("tempstr2", sql.NVarChar, tempstr2)
+//       .input("tempstr3", sql.NVarChar, tempstr3)
+//       .input("tempstr4", sql.NVarChar, tempstr4)
+//       .input("datetime1", sql.NVarChar, datetime1)
+//       .input("datetime2", sql.NVarChar, datetime2)
+//       .input("datetime3", sql.NVarChar, datetime3)
+//       .input("datetime4", sql.NVarChar, datetime4)
+//       .query(`EXEC sp_Feedback_Form @mode,0,@patient_name,@checkup_date,@phone_no,@department,@rating,@feedback_comments,@feedback_date,@staff_member,@resolved_status,'', @created_by,@modified_by, @tempstr1, @tempstr2, @tempstr3, @tempstr4, @datetime1, @datetime2, @datetime3, @datetime4`);
 
-    // Return success response
-    if (result.rowsAffected && result.rowsAffected[0] > 0) {
-      return res.status(200).json({ success: true, message: 'Data inserted successfully' });
-    }
-  } catch (error) {
-    if (error.class === 16 && error.number === 50000) {
-      // Custom error from the stored procedure
-      res.status(400).json({ message: 'Form already exists' });
-    } else {
-      // Handle unexpected errors
-      res.status(500).send(err.message || "Internal Server Error");
+//     // Return success response
+//     if (result.rowsAffected && result.rowsAffected[0] > 0) {
+//       return res.status(200).json({ success: true, message: 'Data inserted successfully' });
+//     }
+//   } catch (error) {
+//     if (error.class === 16 && error.number === 50000) {
+//       // Custom error from the stored procedure
+//       res.status(400).json({ message: 'Form already exists' });
+//     } else {
+//       // Handle unexpected errors
+//       res.status(500).send(err.message || "Internal Server Error");
 
-    }
-  }
-};
+//     }
+//   }
+// };
 
-const deleteformdata = async (req, res) => {
-  const keyfieldsToDelete = req.body.keyfields;
+// const deleteformdata = async (req, res) => {
+//   const keyfieldsToDelete = req.body.keyfields;
 
-  if (!keyfieldsToDelete || !keyfieldsToDelete.length) {
-    res.status(400).send("Invalid or empty company_nos array.");
-    return;
-  }
+//   if (!keyfieldsToDelete || !keyfieldsToDelete.length) {
+//     res.status(400).send("Invalid or empty company_nos array.");
+//     return;
+//   }
 
-  try {
-    const pool = await connection.connectToDatabase();
+//   try {
+//     const pool = await connection.connectToDatabase();
 
-    for (const keyfield of keyfieldsToDelete) {
-      try {
-        await pool.request().input("keyfield", keyfield)
-          .query(`
-                  EXEC sp_Feedback_Form 'i',0,'kathir','2024/06/24','9361934394','bloodcells',1,'not good','2024/06/25','Pavun',0,'ak','',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL
+//     for (const keyfield of keyfieldsToDelete) {
+//       try {
+//         await pool.request().input("keyfield", keyfield)
+//           .query(`
+//                   EXEC sp_Feedback_Form 'i',0,'kathir','2024/06/24','9361934394','bloodcells',1,'not good','2024/06/25','Pavun',0,'ak','',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL
 
-                  `);
-      } catch (error) {
-        if (error.number === 547) {
-          // Foreign key constraint violation
-          res.status(400).send(error.message);
-          return;
-        } else {
-          throw error; // Rethrow other SQL errors
-        }
-      }
-    }
+//                   `);
+//       } catch (error) {
+//         if (error.number === 547) {
+//           // Foreign key constraint violation
+//           res.status(400).send(error.message);
+//           return;
+//         } else {
+//           throw error; // Rethrow other SQL errors
+//         }
+//       }
+//     }
 
-    res.status(200).send("FormData deleted successfully");
-  } catch (error) {
-    console.error(error);
-    res.status(500).send(err.message || "Internal Server Error");
-  }
-};
+//     res.status(200).send("FormData deleted successfully");
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).send(err.message || "Internal Server Error");
+//   }
+// };
 
 const AddReport = async (req, res) => {
   const { SID_no, plans, patient_name, checkup_date, phone_no, gender, created_by } = req.body;
@@ -550,38 +550,38 @@ const deletePatientData = async (req, res) => {
 
 
 
-const addFeedbackForm = async (req, res) => {
-  const savedData = req.body.savedData;
+// const addFeedbackForm = async (req, res) => {
+//   const savedData = req.body.savedData;
 
 
 
-  try {
-    const pool = await connection.connectToDatabase();
+//   try {
+//     const pool = await connection.connectToDatabase();
 
-    for (const updatedRow of savedData) {
-      await pool
-        .request()
-        .input("mode", sql.NVarChar, "I")
-        .input("patient_name", updatedRow.patient_name)
-        .input("checkup_date", updatedRow.checkup_date)
-        .input("phone_no", updatedRow.phone_no)
-        .input("department", updatedRow.department)
-        .input("rating", updatedRow.rating)
-        .input("feedback_comments", updatedRow.feedback_comments)
-        .input("feedback_date", updatedRow.feedback_date)
-        .input("staff_member", updatedRow.staff_member)
-        .input("resolved_status", updatedRow.resolved_status)
-        .input("created_by", updatedRow.created_by)
-        .query(`EXEC sp_Feedback_Form @mode,@patient_name,@checkup_date,@phone_no,@department,@rating,@feedback_comments,@feedback_date,@staff_member,@resolved_status,'','', @created_by,'', '', '', '', '', '', '', '', ''`);
-    }
+//     for (const updatedRow of savedData) {
+//       await pool
+//         .request()
+//         .input("mode", sql.NVarChar, "I")
+//         .input("patient_name", updatedRow.patient_name)
+//         .input("checkup_date", updatedRow.checkup_date)
+//         .input("phone_no", updatedRow.phone_no)
+//         .input("department", updatedRow.department)
+//         .input("rating", updatedRow.rating)
+//         .input("feedback_comments", updatedRow.feedback_comments)
+//         .input("feedback_date", updatedRow.feedback_date)
+//         .input("staff_member", updatedRow.staff_member)
+//         .input("resolved_status", updatedRow.resolved_status)
+//         .input("created_by", updatedRow.created_by)
+//         .query(`EXEC sp_Feedback_Form @mode,@patient_name,@checkup_date,@phone_no,@department,@rating,@feedback_comments,@feedback_date,@staff_member,@resolved_status,'','', @created_by,'', '', '', '', '', '', '', '', ''`);
+//     }
 
-    res.json({ success: true, message: "Data inserted successfully" });
-  } catch (err) {
-    console.error("Error inserting data:", err);
+//     res.json({ success: true, message: "Data inserted successfully" });
+//   } catch (err) {
+//     console.error("Error inserting data:", err);
 
-    res.status(500).json({ message: err.message || "Internal Server Error" });
-  }
-};
+//     res.status(500).json({ message: err.message || "Internal Server Error" });
+//   }
+// };
 
 const Sms = async (req, res) => {
   const { to, message } = req.body;
@@ -1600,122 +1600,117 @@ const UpdateUserImage = async (req, res) => {
   }
 };
 
+// const addformdataTest = async (req, res) => {
+//   const {
+//     patient_name,
+//     checkup_date,
+//     phone_no,
+//     department,
+//     rating,
+//     feedback_comments,
+//     feedback_date,
+//     staff_member,
+//     resolved_status,
+//     created_by,
+//     modified_by,
+//     tempstr1,
+//     tempstr2,
+//     tempstr3,
+//     tempstr4,
+//     datetime1,
+//     datetime2,
+//     datetime3,
+//     datetime4,
+//   } = req.body;
 
-const addformdataTest = async (req, res) => {
-  const {
-    patient_name,
-    checkup_date,
-    phone_no,
-    department,
-    rating,
-    feedback_comments,
-    feedback_date,
-    staff_member,
-    resolved_status,
-    created_by,
-    modified_by,
-    tempstr1,
-    tempstr2,
-    tempstr3,
-    tempstr4,
-    datetime1,
-    datetime2,
-    datetime3,
-    datetime4,
-  } = req.body;
+//   let audio_comment = null;
 
-  let audio_comment = null;
+//   if (req.file) {
+//     audio_comment = req.file.buffer; // Buffer containing the uploaded image
+//   }
 
-  if (req.file) {
-    audio_comment = req.file.buffer; // Buffer containing the uploaded image
-  }
+//   try {
+//     const pool = await sql.connect(dbConfig);
 
-  try {
-    const pool = await sql.connect(dbConfig);
+//     const result = await pool.request()
+//       .input("mode", sql.NVarChar, "I")
+//       .input("patient_name", sql.NVarChar, patient_name)
+//       .input("checkup_date", sql.Date, checkup_date)
+//       .input("phone_no", sql.NVarChar, phone_no)
+//       .input("department", sql.NVarChar, department)
+//       .input("rating", sql.Int, rating)
+//       .input("feedback_comments", sql.Text, feedback_comments)
+//       .input("feedback_date", sql.Date, feedback_date)
+//       .input("staff_member", sql.NVarChar, staff_member)
+//       .input("resolved_status", sql.TinyInt, resolved_status)
+//       .input("audio_comment", sql.VarBinary, audio_comment)
+//       .input("created_by", sql.NVarChar, created_by)
+//       .input("modified_by", sql.NVarChar, modified_by)
+//       .input("tempstr1", sql.NVarChar, tempstr1)
+//       .input("tempstr2", sql.NVarChar, tempstr2)
+//       .input("tempstr3", sql.NVarChar, tempstr3)
+//       .input("tempstr4", sql.NVarChar, tempstr4)
+//       .input("datetime1", sql.NVarChar, datetime1)
+//       .input("datetime2", sql.NVarChar, datetime2)
+//       .input("datetime3", sql.NVarChar, datetime3)
+//       .input("datetime4", sql.NVarChar, datetime4)
+//       .query(`EXEC sp_Feedback_Form @mode,@patient_name,@checkup_date,@phone_no,@department,@rating,@feedback_comments,@feedback_date,@staff_member,@resolved_status,'',@audio_comment,@created_by,@modified_by, @tempstr1, @tempstr2, @tempstr3, @tempstr4, @datetime1, @datetime2, @datetime3, @datetime4`);
 
-    const result = await pool.request()
-      .input("mode", sql.NVarChar, "I")
-      .input("patient_name", sql.NVarChar, patient_name)
-      .input("checkup_date", sql.Date, checkup_date)
-      .input("phone_no", sql.NVarChar, phone_no)
-      .input("department", sql.NVarChar, department)
-      .input("rating", sql.Int, rating)
-      .input("feedback_comments", sql.Text, feedback_comments)
-      .input("feedback_date", sql.Date, feedback_date)
-      .input("staff_member", sql.NVarChar, staff_member)
-      .input("resolved_status", sql.TinyInt, resolved_status)
-      .input("audio_comment", sql.VarBinary, audio_comment)
-      .input("created_by", sql.NVarChar, created_by)
-      .input("modified_by", sql.NVarChar, modified_by)
-      .input("tempstr1", sql.NVarChar, tempstr1)
-      .input("tempstr2", sql.NVarChar, tempstr2)
-      .input("tempstr3", sql.NVarChar, tempstr3)
-      .input("tempstr4", sql.NVarChar, tempstr4)
-      .input("datetime1", sql.NVarChar, datetime1)
-      .input("datetime2", sql.NVarChar, datetime2)
-      .input("datetime3", sql.NVarChar, datetime3)
-      .input("datetime4", sql.NVarChar, datetime4)
-      .query(`EXEC sp_Feedback_Form @mode,@patient_name,@checkup_date,@phone_no,@department,@rating,@feedback_comments,@feedback_date,@staff_member,@resolved_status,'',@audio_comment,@created_by,@modified_by, @tempstr1, @tempstr2, @tempstr3, @tempstr4, @datetime1, @datetime2, @datetime3, @datetime4`);
+//     // Return success response
+//     if (result.rowsAffected && result.rowsAffected[0] > 0) {
+//       return res.status(200).json({ success: true, message: 'Data inserted successfully' });
+//     }
+//   } catch (error) {
+//     if (error.class === 16 && error.number === 50000) {
+//       // Custom error from the stored procedure
+//       res.status(400).json({ message: 'Form already exists' });
+//     } else {
+//       // Handle unexpected errors
+//       res.status(500).send(error.message || "Internal Server Error");
 
-    // Return success response
-    if (result.rowsAffected && result.rowsAffected[0] > 0) {
-      return res.status(200).json({ success: true, message: 'Data inserted successfully' });
-    }
-  } catch (error) {
-    if (error.class === 16 && error.number === 50000) {
-      // Custom error from the stored procedure
-      res.status(400).json({ message: 'Form already exists' });
-    } else {
-      // Handle unexpected errors
-      res.status(500).send(error.message || "Internal Server Error");
+//     }
+//   }
+// };
 
-    }
-  }
-};
-
-
-const addFeedbackFormtest = async (req, res) => {
-  const savedData = req.body.savedData;
-  if (!savedData || !savedData.length) {
-    res.status(400).send("Invalid or empty savedData array.");
-    return;
-  }
-  try {
-    const pool = await connection.connectToDatabase();
-    for (const updatedRow of savedData) {
-      let audioComment = updatedRow.audio_comment || null;
-      if (audioComment) {
-        const buffer = Buffer.from(audioComment, 'base64');
-        audioComment = buffer;
-      }
-      await pool
-        .request()
-        .input("mode", sql.NVarChar, "I")
-        .input("patient_name", updatedRow.patient_name)
-        .input("checkup_date", updatedRow.checkup_date)
-        .input("phone_no", updatedRow.phone_no)
-        .input("department", updatedRow.department)
-        .input("rating", updatedRow.rating)
-        .input("feedback_comments", updatedRow.feedback_comments)
-        .input("feedback_date", updatedRow.feedback_date)
-        .input("staff_member", updatedRow.staff_member)
-        .input("resolved_status", updatedRow.resolved_status)
-        .input("audio_comment", audioComment)  // Use audioComment from updatedRow
-        .input("SID_no", updatedRow.SID_no)
-        .input("plans", updatedRow.plans)
-        .input("created_by", updatedRow.created_by)
-        .query(`
-                  EXEC sp_Feedback_Form
-                    @mode, @patient_name, @checkup_date, @phone_no, @department, @rating,
-                    @feedback_comments, @feedback_date, @staff_member, 0,'', @audio_comment,@SID_no,@plans,@created_by, '', '', '', '', '', '', '', '',''
-                `);
-    }
-    res.json({ success: true, message: "Data inserted successfully" });
-  } catch (err) {
-    console.error("Error inserting data:", err);
-    res.status(500).json({ message: err.message || "Internal Server Error" });
-  }
-};
+// const addFeedbackFormtest = async (req, res) => {
+//   const savedData = req.body.savedData;
+//   if (!savedData || !savedData.length) {
+//     res.status(400).send("Invalid or empty savedData array.");
+//     return;
+//   }
+//   try {
+//     const pool = await connection.connectToDatabase();
+//     for (const updatedRow of savedData) {
+//       let audioComment = updatedRow.audio_comment || null;
+//       if (audioComment) {
+//         const buffer = Buffer.from(audioComment, 'base64');
+//         audioComment = buffer;
+//       }
+//       await pool
+//         .request()
+//         .input("mode", sql.NVarChar, "I")
+//         .input("patient_name", updatedRow.patient_name)
+//         .input("checkup_date", updatedRow.checkup_date)
+//         .input("phone_no", updatedRow.phone_no)
+//         .input("department", updatedRow.department)
+//         .input("rating", updatedRow.rating)
+//         .input("feedback_comments", updatedRow.feedback_comments)
+//         .input("feedback_date", updatedRow.feedback_date)
+//         .input("staff_member", updatedRow.staff_member)
+//         .input("resolved_status", updatedRow.resolved_status)
+//         .input("audio_comment", audioComment) 
+//         .input("SID_no", updatedRow.SID_no)
+//         .input("plans", updatedRow.plans)
+//         .input("created_by", updatedRow.created_by)
+//         .query(`EXEC sp_Feedback_Form @mode, @patient_name, @checkup_date, @phone_no, @department, @rating,
+//         @feedback_comments, @feedback_date, @staff_member, 0,'', @audio_comment,@SID_no,@plans,@created_by, '', '', '', '', '', '', '', '',''`);
+//     }
+//     res.json({ success: true, message: "Data inserted successfully" });
+//   } catch (err) {
+//     console.error("Error inserting data:", err);
+//     res.status(500).json({ message: err.message || "Internal Server Error" });
+//   }
+// };
 
 const getRemarks_Dashboard = async (req, res) => {
   const { mode, start_date, end_date, remarks, patient_name, phone_no, remarkstype } = req.body;
@@ -2405,6 +2400,68 @@ const verifyWhatsAppWebhook = async (req, res) => {
 };
 //Code Ended By Pavun on 29-08-2026
 
+const addFeedbackFormtest = async (req, res) => {
+  const savedData = req.body.savedData;
+
+  if (!savedData || !savedData.length) {
+    return res.status(400).json({ message: "Invalid or empty savedData array." });
+  }
+
+  try {
+    const pool = await connection.connectToDatabase();
+
+    // 1. Extract first row details to determine flow type and batch metadata
+    const firstItem = savedData[0];
+    const isQR = !firstItem.SID_no;
+    const source = isQR ? 'QR' : 'SMS';
+
+    // 2. Generate a single, unique submission_group_id for this entire batch
+    const groupId = isQR
+      ? `QR_${firstItem.phone_no}_${Date.now()}`
+      : `SMS_${firstItem.SID_no}_${Date.now()}`;
+
+    // 3. Process each row in the batch
+    for (const updatedRow of savedData) {
+      let audioComment = updatedRow.audio_comment || null;
+      if (audioComment) {
+        audioComment = Buffer.from(audioComment, 'base64');
+      }
+
+      await pool
+        .request()
+        .input("mode", sql.NVarChar, "I")
+        .input("patient_name", sql.NVarChar, updatedRow.patient_name || null)
+        .input("checkup_date", sql.NVarChar, updatedRow.checkup_date || null)
+        .input("phone_no", sql.NVarChar, updatedRow.phone_no || "")
+        .input("department", sql.NVarChar, updatedRow.department || "")
+        .input("rating", sql.Int, updatedRow.rating || 0)
+        .input("feedback_comments", sql.NVarChar, updatedRow.feedback_comments || "")
+        .input("feedback_date", sql.NVarChar, updatedRow.feedback_date || null)
+        .input("staff_member", sql.NVarChar, updatedRow.staff_member || "")
+        .input("resolved_status", sql.Int, updatedRow.resolved_status || 0)
+        .input("Keyfield", sql.NVarChar, updatedRow.Keyfield || "")
+        .input("audio_comment", sql.VarBinary, audioComment)
+        .input("SID_no", sql.NVarChar, updatedRow.SID_no || null)
+        .input("plans", sql.NVarChar, updatedRow.plans || "")
+        .input("gender", sql.NVarChar, updatedRow.gender || null)
+        .input("feedback_source", sql.NVarChar, source)
+        .input("submission_group_id", sql.NVarChar, groupId)
+        .input("created_by", sql.NVarChar, updatedRow.created_by || "")
+        .query(` EXEC sp_Feedback_Form_test @mode,@patient_name,@checkup_date,@phone_no,@department,@rating,
+         @feedback_comments,@feedback_date,@staff_member,@resolved_status,@Keyfield,@audio_comment,@SID_no,
+         @plans,@gender,@feedback_source,@submission_group_id,@created_by,'','','','','','','','',''`);
+    }
+
+    return res.status(200).json({ success: true, message: "Feedback data inserted successfully" });
+  } catch (err) {
+    console.error("Error inserting feedback data:", err);
+    return res.status(500).json({
+      success: false,
+      message: err.message || "Internal Server Error",
+    });
+  }
+};
+
 module.exports = {
   login,
   getStatus,
@@ -2414,14 +2471,14 @@ module.exports = {
   getattributeSearchdata,
   deleteAttriDetailData,
   updattridetData,
-  addformdata,
-  deleteformdata,
+  // addformdata,
+  // deleteformdata,
   AddReport,
   getQuetions,
   getpatientdata,
   deletePatientData,
   getGender,
-  addFeedbackForm,
+  // addFeedbackForm,
   Sms,
   getDashboard,
   getdepartement,
@@ -2457,7 +2514,7 @@ module.exports = {
   UserdeleteData,
   UsersaveEditedData,
   UpdateUserImage,
-  addformdataTest,
+  // addformdataTest,
   addFeedbackFormtest,
   getRemarks_Dashboard,
   getratingdetails,

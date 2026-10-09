@@ -8,6 +8,7 @@ import Report from './components/Report';
 import AddReport from './components/AddReport';
 import MainLayout from './components/MainLayout';
 import Feed from './components/FeedbackForm';
+import FeedbackQr from './components/FeedbackFromQr';
 import Attri from './AttriDetGrid';
 import AttriDet from './AttriDetInput';
 import AttriHdr from './AttriHdrInput';
@@ -81,6 +82,7 @@ function App() {
     { path: "/MasterDetails", component: <AttriDet /> },
     { path: "/MasterHeader", component: <AttriHdr /> },
     { path: "/Feedback", component: <Feed /> },
+    { path: "/FeedbackQr", component: <FeedbackQr /> },
     { path: "/UploadedPatient", component: <Report /> },
     { path: "/UploadPatient", component: <AddReport /> },
     { path: "/RoleRights", component: <RoleRights /> },
@@ -106,6 +108,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/Feedback" element={<Feed />} />
+        <Route path="/FeedbackQr" element={<FeedbackQr />} />
         {routes.map(({ path, component }) =>
           screenTypes.includes(path.replace("/", "")) ? (
             <Route key={path} path={path} element={<MainLayout>{component}</MainLayout>} />
