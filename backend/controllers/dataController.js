@@ -2441,7 +2441,7 @@ const addFeedbackFormtest = async (req, res) => {
         .input("resolved_status", sql.Int, updatedRow.resolved_status || 0)
         .input("Keyfield", sql.NVarChar, updatedRow.Keyfield || "")
         .input("audio_comment", sql.VarBinary, audioComment)
-        .input("SID_no", sql.NVarChar, updatedRow.SID_no || null)
+        .input("SID_no", sql.Int, updatedRow.SID_no || null)
         .input("plans", sql.NVarChar, updatedRow.plans || "")
         .input("gender", sql.NVarChar, updatedRow.gender || null)
         .input("feedback_source", sql.NVarChar, source)
