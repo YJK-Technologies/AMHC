@@ -336,3 +336,90 @@ p{
     
     
   }
+
+/* Form Container Box Width & Centering Fix */
+.qr-basic-form {
+    width: 100%;
+    max-width: 420px;
+    margin: 0 auto;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* 1. Phone Input Box Styling */
+.qr-input-field {
+    width: 100% !important;
+    height: 44px !important;
+    padding: 8px 14px !important;
+    border-radius: 6px !important;
+    border: 1px solid #ffffff !important;
+    font-size: 15px !important;
+    background-color: #ffffff !important;
+    color: #222222 !important;
+    outline: none !important;
+    box-sizing: border-box !important;
+}
+
+.qr-input-field::placeholder {
+    color: #777777 !important;
+}
+
+/* 2. React Select Component Outer Container */
+.qr-select-container {
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+.qr-select__control {
+    width: 100% !important;
+    min-height: 44px !important;
+    border-radius: 6px !important;
+    border: 1px solid #ffffff !important;
+    background-color: #ffffff !important;
+    box-shadow: none !important;
+}
+
+.qr-select__control--is-focused {
+    border-color: #0d6efd !important;
+}
+
+/* 3. Selected Value & Placeholder Text Colors */
+.qr-select__single-value,
+.qr-select__placeholder {
+    color: #222222 !important;
+    font-size: 15px !important;
+}
+
+/* 4. Dropdown Menu List Bug Fix (Visibility & Color Fix) */
+.qr-select__menu {
+    width: 100% !important;
+    background-color: #ffffff !important;
+    border-radius: 6px !important;
+    z-index: 9999 !important;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15) !important;
+    margin-top: 4px !important;
+}
+
+.qr-select__menu-list {
+    padding: 4px 0 !important;
+}
+
+/* Dropdown Option Items Color Fix */
+.qr-select__option {
+    color: #222222 !important;
+    font-size: 14px !important;
+    padding: 10px 14px !important;
+    cursor: pointer !important;
+    background-color: transparent !important;
+}
+
+/* Hover & Active States */
+.qr-select__option--is-focused {
+    background-color: #e9ecef !important;
+    color: #000000 !important;
+}
+
+.qr-select__option--is-selected {
+    background-color: #0d6efd !important;
+    color: #ffffff !important;
+}
