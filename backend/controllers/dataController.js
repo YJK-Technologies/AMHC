@@ -2462,6 +2462,72 @@ const addFeedbackFormtest = async (req, res) => {
   }
 };
 
+const receiveWhatsAppMessage = async (req, res) => {
+  try {
+    const body = req.body;
+
+    // Check if it's a WhatsApp webhook event
+    if (body.object === "whatsapp_business_account") {
+      const entry = body.entry?.[0];
+      const changes = entry?.changes?.[0];
+      const value = changes?.value;
+      const message = value?.messages?.[0];
+
+      if (message) {
+        let senderPhone = message.from; // Sender's WhatsApp number
+        let messageText = message.text?.body?.toLowerCase().trim(); // User msg text
+
+        console.log(`Message received from ${senderPhone}: ${messageText}`);
+
+        let replyText = "Vanakkam! Unga msg-ku nandri."; // Default reply
+
+        // **Custom Replies Logic based on User Message**
+        if (messageText === "hi" || messageText === "hello") {
+          replyText = "Vanakkam! Epdi irukeengah? Naan unga Assistant.";
+        } else if (messageText === "price" || messageText === "details") {
+          paduthu = "Engaloda product details intha link la iruku...";
+        } else {
+          replyText = "Puriyala. Karuthu sollunga: 'Hi' nu type pannunga.";
+        }
+
+        // Send reply back to user
+        await sendWhatsAppMessage(senderPhone, replyText);
+      }
+
+      res.sendStatus(200); // Meta-ku success response anuppanum (Important!)
+    } else {
+      res.sendStatus(404);
+    }
+  } catch (err) {
+    console.error("Webhook POST Error:", err);
+    res.sendStatus(500);
+  }
+};
+
+const sendWhatsAppMessage = async (recipientPhone, textResponse) => {
+  const PHONE_NUMBER_ID = "1297105200158723"; // Unga Phone Number ID
+  const ACCESS_TOKEN = "EAAYV5kdZCTpIBST5AboKpquwDhbgbM5TmeRKGil7xOkZB7ds2GRSJeZASfXjjDnbeoub9JZCOCZADV4OzrMnDoa2gh3AYrIuFq1JkgGgFkI7gpMx2Mo9aHDxQKIrubk4ZAwVFCjAzNaNZC5BdB4hVx1WovQoK2yUfFGJZAGc8xRAZBczgIXZBnUz9eZC3Wk4fEmJgZDZD"; // Unga Permanent/Temporary Token
+
+  try {
+    await axios({
+      method: "POST",
+      url: `https://graph.facebook.com/v17.0/${PHONE_NUMBER_ID}/messages`,
+      headers: {
+        Authorization: `Bearer ${ACCESS_TOKEN}`,
+        "Content-Type": "application/json",
+      },
+      data: {
+        messaging_product: "whatsapp",
+        to: recipientPhone,
+        text: { body: textResponse },
+      },
+    });
+    console.log("Reply sent successfully!");
+  } catch (error) {
+    console.error("Error sending reply:", error.response?.data || error.message);
+  }
+};
+
 module.exports = {
   login,
   getStatus,
@@ -2536,5 +2602,6 @@ module.exports = {
   GetSndnoData,
   getDashboardCM,
   getDashboardLM,
-  verifyWhatsAppWebhook
+  verifyWhatsAppWebhook,
+  receiveWhatsAppMessage
 };

@@ -83,7 +83,7 @@ router.post("/GetSndnoData", dataController.GetSndnoData)
 router.post("/getDashboardCM", dataController.getDashboardCM)
 router.post("/getDashboardLM", dataController.getDashboardLM)
 router.get("/whatsapp-webhook", dataController.verifyWhatsAppWebhook);
-
+router.post("/whatsapp-webhook", dataController.receiveWhatsAppMessage);
 
 module.exports = router;
      
