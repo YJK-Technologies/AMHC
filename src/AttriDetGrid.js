@@ -88,6 +88,16 @@ const AttriDetGrid = () => {
         maxLength: 250,
       },
     },
+    {
+      headerName: "Order No",
+      field: "order_no",
+      editable: true,
+      cellStyle: { textAlign: "center" },
+      // minWidth: 150,
+      cellEditorParams: {
+        maxLength: 250,
+      },
+    },
   ];
 
   const defaultColDef = {

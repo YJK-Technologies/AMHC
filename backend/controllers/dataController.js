@@ -14,6 +14,9 @@ const accountSid = "AC310b839363f201619504003725860286";
 const authToken = "1641d6484f33fb67790da17909dce534";
 const twilioClient = twilio(accountSid, authToken);
 
+const PHONE_NUMBER_ID = process.env.WHATSAPP_PHONE_NUMBER_ID;
+const ACCESS_TOKEN = process.env.WHATSAPP_ACCESS_TOKEN;
+const API_VERSION = process.env.META_API_VERSION;
 
 
 const login = async (req, res) => {
@@ -67,7 +70,7 @@ const getStatus = async (req, res) => {
   try {
     await connection.connectToDatabase();
     const result = await sql.query(
-      `EXEC sp_attribute_Info 'F','','status','','', '' , '','',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL`
+      `EXEC sp_attribute_Info_test 'F','','status','','', '' , 0,'','',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL`
     );
 
     res.json(result.recordset);
@@ -132,7 +135,7 @@ const geattrihdrcode = async (req, res) => {
   try {
     await connection.connectToDatabase();
     const result = await sql.query(
-      "EXEC sp_attribute_Info 'TS','','', '','','','','',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL"
+      "EXEC sp_attribute_Info_test 'TS','','', '','','',0,'','',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL"
     );
 
     res.json(result.recordset);
@@ -149,6 +152,7 @@ const addattridetData = async (req, res) => {
     attributedetails_code,
     attributedetails_name,
     descriptions,
+    order_no,
     created_by,
     modified_by,
     tempstr1,
@@ -178,6 +182,7 @@ const addattridetData = async (req, res) => {
       .input('attributedetails_code', sql.NVarChar, attributedetails_code)
       .input('attributedetails_name', sql.NVarChar, attributedetails_name)
       .input('descriptions', sql.NVarChar, descriptions)
+      .input('order_no', sql.Int, order_no)
       .input('created_by', sql.NVarChar, created_by)
       .input('modified_by', sql.NVarChar, modified_by)
       .input('tempstr1', sql.NVarChar, tempstr1)
@@ -189,8 +194,8 @@ const addattridetData = async (req, res) => {
       .input('datetime3', sql.NVarChar, datetime3)
       .input('datetime4', sql.NVarChar, datetime4)
       .query(
-        `EXEC sp_attribute_Info @mode,@company_code,@attributeheader_code, @attributedetails_code,@attributedetails_name,@descriptions,@created_by,@modified_by,@tempstr1, @tempstr2, @tempstr3, @tempstr4, 
-              @datetime1, @datetime2, @datetime3, @datetime4`
+        `EXEC sp_attribute_Info_test @mode,@company_code,@attributeheader_code, @attributedetails_code,@attributedetails_name,@descriptions,@order_no,
+        @created_by,@modified_by,@tempstr1, @tempstr2, @tempstr3, @tempstr4, @datetime1, @datetime2, @datetime3, @datetime4`
       );
     // Return success response
     if (result.rowsAffected && result.rowsAffected[0] > 0) {
@@ -218,7 +223,7 @@ const getattributeSearchdata = async (req, res) => {
       .input("attributedetails_code", sql.NVarChar, attributedetails_code)
       .input("attributedetails_name", sql.NVarChar, attributedetails_name)
       .input("descriptions", sql.NVarChar, descriptions)
-      .query(`EXEC sp_attribute_Info 'SC','',@attributeheader_code,@attributedetails_code,@attributedetails_name,@descriptions,'','','','','','','','','',''
+      .query(`EXEC sp_attribute_Info_test 'SC','',@attributeheader_code,@attributedetails_code,@attributedetails_name,@descriptions,'',0,'','','','','','','','',''
               `);
 
     // Send response
@@ -244,7 +249,7 @@ const deleteAttriDetailData = async (req, res) => {
   try {
     const pool = await connection.connectToDatabase();
 
-    const deleteQuery = `EXEC sp_attribute_Info 'D',@company_code,@attributeheader_code, @attributedetails_code,'','','',@modified_by,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL
+    const deleteQuery = `EXEC sp_attribute_Info_test 'D',@company_code,@attributeheader_code, @attributedetails_code,'','',0,'',@modified_by,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL
             `;
     for (let i = 0; i < attributeheader_codesToDelete.length; i++) {
       try {
@@ -296,6 +301,7 @@ const updattridetData = async (req, res) => {
         .input("attributedetails_code", attributedetails_codesToUpdate[i])
         .input("attributedetails_name", sql.NVarChar, updatedRow.attributedetails_name)
         .input("descriptions", sql.NVarChar, updatedRow.descriptions)
+        .input("order_no", sql.Int, updatedRow.order_no)
         .input("created_by", sql.NVarChar, updatedRow.created_by)
         .input("modified_by", sql.NVarChar, req.headers['modified-by'])
         .input("tempstr1", sql.NVarChar, updatedRow.tempstr1)
@@ -307,7 +313,8 @@ const updattridetData = async (req, res) => {
         .input("datetime3", sql.NVarChar, updatedRow.datetime3)
         .input("datetime4", sql.NVarChar, updatedRow.datetime4)
         .query(
-          `EXEC sp_attribute_Info @mode,@company_code, @attributeheader_code, @attributedetails_code, @attributedetails_name, @descriptions, @created_by,@modified_by, @tempstr1, @tempstr2, @tempstr3, @tempstr4, @datetime1, @datetime2, @datetime3, @datetime4`
+          `EXEC sp_attribute_Info_test @mode,@company_code, @attributeheader_code, @attributedetails_code, @attributedetails_name, @descriptions, 
+          @order_no, @created_by,@modified_by, @tempstr1, @tempstr2, @tempstr3, @tempstr4, @datetime1, @datetime2, @datetime3, @datetime4`
         );
     }
 
@@ -331,7 +338,7 @@ const getQuetions = async (req, res) => {
       .input("mode", sql.NVarChar, "FT")
       .input("attributeheader_code", sql.NVarChar, attributeheader_code)
       .input("descriptions", sql.NVarChar, descriptions)
-      .query(`EXEC sp_attribute_Info @mode,'',@attributeheader_code,'','', @descriptions , '','',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL`);
+      .query(`EXEC sp_attribute_Info_test @mode,'',@attributeheader_code,'','', @descriptions , 0,'','',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL`);
     res.json(result.recordset);
   } catch (err) {
     console.error(err);
@@ -344,7 +351,7 @@ const getGender = async (req, res) => {
   try {
     await connection.connectToDatabase();
     const result = await sql.query(
-      "EXEC sp_attribute_Info 'F','','Gender','','', '' ,'','', NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL"
+      "EXEC sp_attribute_Info_test 'F','','Gender','','', '' ,0,'','', NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL"
     );
 
     res.json(result.recordset);
@@ -634,7 +641,7 @@ const getdepartement = async (req, res) => {
       .request()
       .input("mode", sql.NVarChar, "DD")
       .input("attributeheader_code", sql.NVarChar, attributeheader_code)
-      .query("EXEC sp_attribute_Info @mode,'',@attributeheader_code,'','', '' ,'','', NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL");
+      .query("EXEC sp_attribute_Info_test @mode,'',@attributeheader_code,'','', '' ,0,'','', NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL");
     if (result.recordset.length > 0) {
       res.status(200).json(result.recordset); // 200 OK if data is found
     } else {
@@ -762,7 +769,7 @@ const getDaterange = async (req, res) => {
   try {
     await connection.connectToDatabase();
     const result = await sql.query(
-      "EXEC sp_attribute_Info 'DR','',' Date Range','','', '' ,'','', NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL"
+      "EXEC sp_attribute_Info_test 'DR','',' Date Range','','', '' ,0,'','', NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL"
     );
     if (result.recordset.length > 0) {
       res.status(200).json(result.recordset); // 200 OK if data is found
@@ -779,7 +786,7 @@ const getplan = async (req, res) => {
   try {
     await connection.connectToDatabase();
     const result = await sql.query(
-      "EXEC sp_attribute_Info 'F','','Plan','','', '' ,'','', NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL"
+      "EXEC sp_attribute_Info_test 'F','','Plan','','', '' ,0,'','', NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL"
     );
     if (result.recordset.length > 0) {
       res.status(200).json(result.recordset); // 200 OK if data is found
@@ -1289,7 +1296,7 @@ const getScreens = async (req, res) => {
   try {
     await connection.connectToDatabase();
     const result = await sql.query(
-      "EXEC sp_attribute_Info 'F','','Screens','',' ', ' ','','' , NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL"
+      "EXEC sp_attribute_Info_test 'F','','Screens','',' ', ' ',0,'','' , NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL"
     );
 
     if (result.recordset.length > 0) {
@@ -1307,7 +1314,7 @@ const getpermission = async (req, res) => {
   try {
     await connection.connectToDatabase();
     const result = await sql.query(
-      "EXEC sp_attribute_Info 'F','','Permission','',' ', ' ','','' , NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL"
+      "EXEC sp_attribute_Info_test 'F','','Permission','',' ', ' ',0,'','' , NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL"
     );
 
     if (result.recordset.length > 0) {
@@ -1325,7 +1332,7 @@ const getRemarks = async (req, res) => {
   try {
     await connection.connectToDatabase();
     const result = await sql.query(
-      "EXEC sp_attribute_Info 'F','','Remarks','',' ', ' ','','' , NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL"
+      "EXEC sp_attribute_Info_test 'F','','Remarks','',' ', ' ',0,'','' , NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL"
     );
 
     if (result.recordset.length > 0) {
@@ -1346,7 +1353,7 @@ const getLoginorout = async (req, res) => {
   try {
     await connection.connectToDatabase();
     const result = await sql.query(
-      "EXEC sp_attribute_Info 'F','','Log IN/OUT','','', '' ,'','', NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL"
+      "EXEC sp_attribute_Info_test 'F','','Log IN/OUT','','', '' ,0,'','', NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL"
     );
 
     if (result.recordset.length > 0) {
@@ -1384,7 +1391,7 @@ const getUsertype = async (req, res) => {
   try {
     await connection.connectToDatabase();
     const result = await sql.query(
-      `EXEC sp_attribute_Info 'F','','User Type', '','','','','',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL
+      `EXEC sp_attribute_Info_test 'F','','User Type', '','','',0,'','',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL
         `
     );
 
@@ -2037,7 +2044,7 @@ const getMsgStatus = async (req, res) => {
   try {
     await connection.connectToDatabase();
     const result = await sql.query(
-      `EXEC sp_attribute_Info 'F','','Msg Status', '','','','','',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL
+      `EXEC sp_attribute_Info_test 'F','','Msg Status', '','','',0,'','',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL
             `
     );
 
@@ -2308,7 +2315,7 @@ const getDashboardPlan = async (req, res) => {
   try {
     await connection.connectToDatabase();
     const result = await sql.query(
-      "EXEC sp_attribute_Info 'DP','','Plan','','', '' ,'','', NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL"
+      "EXEC sp_attribute_Info_test 'DP','','Plan','','', '' ,0,'','', NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL"
     );
     if (result.recordset.length > 0) {
       res.status(200).json(result.recordset); // 200 OK if data is found
@@ -2371,7 +2378,8 @@ const getDashboardLM = async (req, res) => {
 const verifyWhatsAppWebhook = async (req, res) => {
   try {
     // Replace with your actual token or use process.env.MY_VERIFY_TOKEN
-    const MY_VERIFY_TOKEN = "EAAYV5kdZCTpIBST5AboKpquwDhbgbM5TmeRKGil7xOkZB7ds2GRSJeZASfXjjDnbeoub9JZCOCZADV4OzrMnDoa2gh3AYrIuFq1JkgGgFkI7gpMx2Mo9aHDxQKIrubk4ZAwVFCjAzNaNZC5BdB4hVx1WovQoK2yUfFGJZAGc8xRAZBczgIXZBnUz9eZC3Wk4fEmJgZDZD"; 
+    // const MY_VERIFY_TOKEN = "EAAYV5kdZCTpIBST5AboKpquwDhbgbM5TmeRKGil7xOkZB7ds2GRSJeZASfXjjDnbeoub9JZCOCZADV4OzrMnDoa2gh3AYrIuFq1JkgGgFkI7gpMx2Mo9aHDxQKIrubk4ZAwVFCjAzNaNZC5BdB4hVx1WovQoK2yUfFGJZAGc8xRAZBczgIXZBnUz9eZC3Wk4fEmJgZDZD"; 
+    const MY_VERIFY_TOKEN = ACCESS_TOKEN; 
 
     // Meta sends these query parameters
     let mode = req.query["hub.mode"];
@@ -2462,70 +2470,271 @@ const addFeedbackFormtest = async (req, res) => {
   }
 };
 
+// const receiveWhatsAppMessage = async (req, res) => {
+//   try {
+//     const body = req.body;
+
+//     // Check if it's a WhatsApp webhook event
+//     if (body.object === "whatsapp_business_account") {
+//       const entry = body.entry?.[0];
+//       const changes = entry?.changes?.[0];
+//       const value = changes?.value;
+//       const message = value?.messages?.[0];
+
+//       if (message) {
+//         let senderPhone = message.from; // Sender's WhatsApp number
+//         let messageText = message.text?.body?.toLowerCase().trim(); // User msg text
+
+//         console.log(`Message received from ${senderPhone}: ${messageText}`);
+
+//         let replyText = "Vanakkam! Unga msg-ku nandri."; // Default reply
+
+//         // **Custom Replies Logic based on User Message**
+//         if (messageText === "hi" || messageText === "hello") {
+//           replyText = "Vanakkam! Epdi irukeengah? Naan unga Assistant.";
+//         } else if (messageText === "price" || messageText === "details") {
+//           replyText = "Engaloda product details intha link la iruku..."; // Typo fixed here
+//         } else {
+//           replyText = "Puriyala. Karuthu sollunga: 'Hi' nu type pannunga.";
+//         }
+
+//         // Send reply back to user using native fetch
+//         await sendWhatsAppMessage(senderPhone, replyText);
+//       }
+
+//       res.sendStatus(200); // Meta-ku success response anuppanum
+//     } else {
+//       res.sendStatus(404);
+//     }
+//   } catch (err) {
+//     console.error("Webhook POST Error:", err);
+//     res.sendStatus(500);
+//   }
+// };
+
+// const sendWhatsAppMessage = async (recipientPhone, textResponse) => {
+//   const PHONE_NUMBER_ID = "1297105200158723";
+//   const ACCESS_TOKEN = "EAAYV5kdZCTpIBST5AboKpquwDhbgbM5TmeRKGil7xOkZB7ds2GRSJeZASfXjjDnbeoub9JZCOCZADV4OzrMnDoa2gh3AYrIuFq1JkgGgFkI7gpMx2Mo9aHDxQKIrubk4ZAwVFCjAzNaNZC5BdB4hVx1WovQoK2yUfFGJZAGc8xRAZBczgIXZBnUz9eZC3Wk4fEmJgZDZD"; // System User Access Token
+
+//   // Clean the phone number (remove any '+' or spaces if present)
+//   const formattedPhone = recipientPhone.replace(/\D/g, '');
+
+//   const payload = {
+//     messaging_product: "whatsapp",
+//     to: formattedPhone,
+//     type: "text",
+//     text: { 
+//       body: textResponse 
+//     }
+//   };
+
+//   try {
+//     const response = await fetch(`https://graph.facebook.com/v26.0/${PHONE_NUMBER_ID}/messages`, {
+//       method: "POST",
+//       headers: {
+//         "Authorization": `Bearer ${ACCESS_TOKEN}`,
+//         "Content-Type": "application/json",
+//       },
+//       body: JSON.stringify(payload),
+//     });
+
+//     const data = await response.json();
+
+//     if (!response.ok) {
+//       console.error("Meta API Error Response:", JSON.stringify(data, null, 2));
+//       throw new Error(data.error?.message || "Failed to send message");
+//     }
+
+//     console.log("Reply sent successfully:", data);
+//   } catch (error) {
+//     console.error("Error sending reply function:", error.message || error);
+//   }
+// };
+
+// Environment variables recommended for security
+
+/**
+ * Webhook Endpoint to handle incoming WhatsApp Messages
+ */
 const receiveWhatsAppMessage = async (req, res) => {
-  try {
-    const body = req.body;
+  try {
+    const body = req.body;
 
-    // Check if it's a WhatsApp webhook event
-    if (body.object === "whatsapp_business_account") {
-      const entry = body.entry?.[0];
-      const changes = entry?.changes?.[0];
-      const value = changes?.value;
-      const message = value?.messages?.[0];
+    if (body.object === "whatsapp_business_account") {
+      const entry = body.entry?.[0];
+      const changes = entry?.changes?.[0];
+      const value = changes?.value;
+      const message = value?.messages?.[0];
 
-      if (message) {
-        let senderPhone = message.from; // Sender's WhatsApp number
-        let messageText = message.text?.body?.toLowerCase().trim(); // User msg text
+      if (message) {
+        const senderPhone = message.from;
+        
+        // 1. Check if the incoming message is an Interactive Button Response
+        if (message.type === "interactive") {
+          const buttonId = message.interactive?.button_reply?.id;
+          console.log(`Button clicked by ${senderPhone}: ${buttonId}`);
 
-        console.log(`Message received from ${senderPhone}: ${messageText}`);
+          await handleProductDetailsResponse(senderPhone, buttonId);
+        } 
+        // 2. Check if the incoming message is regular Text
+        else if (message.type === "text") {
+          const messageText = message.text?.body?.toLowerCase().trim();
+          console.log(`Text message received from ${senderPhone}: ${messageText}`);
 
-        let replyText = "Vanakkam! Unga msg-ku nandri."; // Default reply
+          // If the user typed the exact keyword manually
+          if (["erp", "hospital", "feedback"].some(key => messageText.includes(key))) {
+            let selectedId = "";
+            if (messageText.includes("erp")) selectedId = "btn_erp";
+            else if (messageText.includes("hospital")) selectedId = "btn_hospital";
+            else if (messageText.includes("feedback")) selectedId = "btn_feedback";
 
-        // **Custom Replies Logic based on User Message**
-        if (messageText === "hi" || messageText === "hello") {
-          replyText = "Vanakkam! Epdi irukeengah? Naan unga Assistant.";
-        } else if (messageText === "price" || messageText === "details") {
-          paduthu = "Engaloda product details intha link la iruku...";
-        } else {
-          replyText = "Puriyala. Karuthu sollunga: 'Hi' nu type pannunga.";
-        }
+            await handleProductDetailsResponse(senderPhone, selectedId);
+          } else {
+            // For any other general text, send the Greeting with Menu Buttons
+            await sendCompanyMenu(senderPhone);
+          }
+        }
+      }
 
-        // Send reply back to user
-        await sendWhatsAppMessage(senderPhone, replyText);
-      }
-
-      res.sendStatus(200); // Meta-ku success response anuppanum (Important!)
-    } else {
-      res.sendStatus(404);
-    }
-  } catch (err) {
-    console.error("Webhook POST Error:", err);
-    res.sendStatus(500);
-  }
+      // Always return 200 OK to Meta
+      res.sendStatus(200);
+    } else {
+      res.sendStatus(404);
+    }
+  } catch (err) {
+    console.error("Webhook POST Error:", err);
+    res.sendStatus(500);
+  }
 };
 
-const sendWhatsAppMessage = async (recipientPhone, textResponse) => {
-  const PHONE_NUMBER_ID = "1297105200158723"; // Unga Phone Number ID
-  const ACCESS_TOKEN = "EAAYV5kdZCTpIBST5AboKpquwDhbgbM5TmeRKGil7xOkZB7ds2GRSJeZASfXjjDnbeoub9JZCOCZADV4OzrMnDoa2gh3AYrIuFq1JkgGgFkI7gpMx2Mo9aHDxQKIrubk4ZAwVFCjAzNaNZC5BdB4hVx1WovQoK2yUfFGJZAGc8xRAZBczgIXZBnUz9eZC3Wk4fEmJgZDZD"; // Unga Permanent/Temporary Token
+/**
+ * Send Interactive Menu with Reply Buttons
+ */
+const sendCompanyMenu = async (recipientPhone) => {
+  const payload = {
+    messaging_product: "whatsapp",
+    to: recipientPhone.replace(/\D/g, ''),
+    type: "interactive",
+    interactive: {
+      type: "button",
+      header: {
+        type: "text",
+        text: "Welcome to Our Company!"
+      },
+      body: {
+        text: "Thank you for reaching out to us. How can we help you today? Please select an option below to view details and pricing:"
+      },
+      footer: {
+        text: "Select a service below"
+      },
+      action: {
+        buttons: [
+          {
+            type: "reply",
+            reply: {
+              id: "btn_erp",
+              title: "ERP System"
+            }
+          },
+          {
+            type: "reply",
+            reply: {
+              id: "btn_hospital",
+              title: "Hospital System"
+            }
+          },
+          {
+            type: "reply",
+            reply: {
+              id: "btn_feedback",
+              title: "Feedback System"
+            }
+          }
+        ]
+      }
+    }
+  };
 
-  try {
-    await axios({
-      method: "POST",
-      url: `https://graph.facebook.com/v17.0/${PHONE_NUMBER_ID}/messages`,
-      headers: {
-        Authorization: `Bearer ${ACCESS_TOKEN}`,
-        "Content-Type": "application/json",
-      },
-      data: {
-        messaging_product: "whatsapp",
-        to: recipientPhone,
-        text: { body: textResponse },
-      },
-    });
-    console.log("Reply sent successfully!");
-  } catch (error) {
-    console.error("Error sending reply:", error.response?.data || error.message);
-  }
+  await callWhatsAppApi(payload);
+};
+
+/**
+ * Send details and pricing based on selected option
+ */
+const handleProductDetailsResponse = async (recipientPhone, selectedOptionId) => {
+  let detailsText = "";
+
+  switch (selectedOptionId) {
+    case "btn_erp":
+      detailsText = 
+        `🏢 *Enterprise Resource Planning (ERP) System*\n\n` +
+        `• *Features:* HR & Payroll, Inventory Management, Billing, Sales Analytics, and Multi-branch support.\n` +
+        `• *Price:* Starts at $499 (One-time or Monthly plans available).\n\n` +
+        `Reply with *'Contact'* if you want a live demo!`;
+      break;
+
+    case "btn_hospital":
+      detailsText = 
+        `🏥 *Hospital Management System*\n\n` +
+        `• *Features:* Patient Registration, OPD/IPD Management, Doctor Scheduling, Electronic Health Records (EHR), Lab & Pharmacy Billing.\n` +
+        `• *Price:* Starts at $799 (Includes setup & training).\n\n` +
+        `Reply with *'Contact'* if you want a live demo!`;
+      break;
+
+    case "btn_feedback":
+      detailsText = 
+        `⭐ *Feedback Management System*\n\n` +
+        `• *Features:* Real-time Customer Reviews, QR Code Feedback, Analytics Dashboard, Automated WhatsApp Follow-ups.\n` +
+        `• *Price:* Starts at $199/year.\n\n` +
+        `Reply with *'Contact'* if you want a live demo!`;
+      break;
+
+    default:
+      detailsText = "Invalid option selected. Please contact support.";
+  }
+
+  await sendTextMessage(recipientPhone, detailsText);
+};
+
+/**
+ * Helper to send simple text messages
+ */
+const sendTextMessage = async (recipientPhone, textResponse) => {
+  const payload = {
+    messaging_product: "whatsapp",
+    to: recipientPhone.replace(/\D/g, ''),
+    type: "text",
+    text: { body: textResponse }
+  };
+
+  await callWhatsAppApi(payload);
+};
+
+/**
+ * Meta Graph API HTTP Caller
+ */
+const callWhatsAppApi = async (payload) => {
+  try {
+    const response = await fetch(`https://graph.facebook.com/v20.0/${PHONE_NUMBER_ID}/messages`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${ACCESS_TOKEN}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error("Meta API Error Response:", JSON.stringify(data, null, 2));
+      throw new Error(data.error?.message || "Failed to send WhatsApp message");
+    }
+
+    console.log("Message sent successfully:", data);
+  } catch (error) {
+    console.error("Error in callWhatsAppApi:", error.message || error);
+  }
 };
 
 module.exports = {
