@@ -70,7 +70,7 @@ const getStatus = async (req, res) => {
   try {
     await connection.connectToDatabase();
     const result = await sql.query(
-      `EXEC sp_attribute_Info 'F','','status','','', '' , '','',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL`
+      `EXEC sp_attribute_Info_test 'F','','status','','', '' , 0,'','',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL`
     );
 
     res.json(result.recordset);
@@ -135,7 +135,7 @@ const geattrihdrcode = async (req, res) => {
   try {
     await connection.connectToDatabase();
     const result = await sql.query(
-      "EXEC sp_attribute_Info 'TS','','', '','','','','',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL"
+      "EXEC sp_attribute_Info_test 'TS','','', '','','',0,'','',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL"
     );
 
     res.json(result.recordset);
@@ -152,6 +152,7 @@ const addattridetData = async (req, res) => {
     attributedetails_code,
     attributedetails_name,
     descriptions,
+    order_no,
     created_by,
     modified_by,
     tempstr1,
@@ -181,6 +182,7 @@ const addattridetData = async (req, res) => {
       .input('attributedetails_code', sql.NVarChar, attributedetails_code)
       .input('attributedetails_name', sql.NVarChar, attributedetails_name)
       .input('descriptions', sql.NVarChar, descriptions)
+      .input('order_no', sql.Int, order_no)
       .input('created_by', sql.NVarChar, created_by)
       .input('modified_by', sql.NVarChar, modified_by)
       .input('tempstr1', sql.NVarChar, tempstr1)
@@ -192,8 +194,8 @@ const addattridetData = async (req, res) => {
       .input('datetime3', sql.NVarChar, datetime3)
       .input('datetime4', sql.NVarChar, datetime4)
       .query(
-        `EXEC sp_attribute_Info @mode,@company_code,@attributeheader_code, @attributedetails_code,@attributedetails_name,@descriptions,@created_by,@modified_by,@tempstr1, @tempstr2, @tempstr3, @tempstr4, 
-              @datetime1, @datetime2, @datetime3, @datetime4`
+        `EXEC sp_attribute_Info_test @mode,@company_code,@attributeheader_code, @attributedetails_code,@attributedetails_name,@descriptions,@order_no,
+        @created_by,@modified_by,@tempstr1, @tempstr2, @tempstr3, @tempstr4, @datetime1, @datetime2, @datetime3, @datetime4`
       );
     // Return success response
     if (result.rowsAffected && result.rowsAffected[0] > 0) {
@@ -221,7 +223,7 @@ const getattributeSearchdata = async (req, res) => {
       .input("attributedetails_code", sql.NVarChar, attributedetails_code)
       .input("attributedetails_name", sql.NVarChar, attributedetails_name)
       .input("descriptions", sql.NVarChar, descriptions)
-      .query(`EXEC sp_attribute_Info 'SC','',@attributeheader_code,@attributedetails_code,@attributedetails_name,@descriptions,'','','','','','','','','',''
+      .query(`EXEC sp_attribute_Info_test 'SC','',@attributeheader_code,@attributedetails_code,@attributedetails_name,@descriptions,'',0,'','','','','','','','',''
               `);
 
     // Send response
@@ -247,7 +249,7 @@ const deleteAttriDetailData = async (req, res) => {
   try {
     const pool = await connection.connectToDatabase();
 
-    const deleteQuery = `EXEC sp_attribute_Info 'D',@company_code,@attributeheader_code, @attributedetails_code,'','','',@modified_by,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL
+    const deleteQuery = `EXEC sp_attribute_Info_test 'D',@company_code,@attributeheader_code, @attributedetails_code,'','',0,'',@modified_by,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL
             `;
     for (let i = 0; i < attributeheader_codesToDelete.length; i++) {
       try {
@@ -299,6 +301,7 @@ const updattridetData = async (req, res) => {
         .input("attributedetails_code", attributedetails_codesToUpdate[i])
         .input("attributedetails_name", sql.NVarChar, updatedRow.attributedetails_name)
         .input("descriptions", sql.NVarChar, updatedRow.descriptions)
+        .input("order_no", sql.Int, updatedRow.order_no)
         .input("created_by", sql.NVarChar, updatedRow.created_by)
         .input("modified_by", sql.NVarChar, req.headers['modified-by'])
         .input("tempstr1", sql.NVarChar, updatedRow.tempstr1)
@@ -310,7 +313,8 @@ const updattridetData = async (req, res) => {
         .input("datetime3", sql.NVarChar, updatedRow.datetime3)
         .input("datetime4", sql.NVarChar, updatedRow.datetime4)
         .query(
-          `EXEC sp_attribute_Info @mode,@company_code, @attributeheader_code, @attributedetails_code, @attributedetails_name, @descriptions, @created_by,@modified_by, @tempstr1, @tempstr2, @tempstr3, @tempstr4, @datetime1, @datetime2, @datetime3, @datetime4`
+          `EXEC sp_attribute_Info_test @mode,@company_code, @attributeheader_code, @attributedetails_code, @attributedetails_name, @descriptions, 
+          @order_no, @created_by,@modified_by, @tempstr1, @tempstr2, @tempstr3, @tempstr4, @datetime1, @datetime2, @datetime3, @datetime4`
         );
     }
 
@@ -334,7 +338,7 @@ const getQuetions = async (req, res) => {
       .input("mode", sql.NVarChar, "FT")
       .input("attributeheader_code", sql.NVarChar, attributeheader_code)
       .input("descriptions", sql.NVarChar, descriptions)
-      .query(`EXEC sp_attribute_Info @mode,'',@attributeheader_code,'','', @descriptions , '','',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL`);
+      .query(`EXEC sp_attribute_Info_test @mode,'',@attributeheader_code,'','', @descriptions , 0,'','',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL`);
     res.json(result.recordset);
   } catch (err) {
     console.error(err);
@@ -347,7 +351,7 @@ const getGender = async (req, res) => {
   try {
     await connection.connectToDatabase();
     const result = await sql.query(
-      "EXEC sp_attribute_Info 'F','','Gender','','', '' ,'','', NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL"
+      "EXEC sp_attribute_Info_test 'F','','Gender','','', '' ,0,'','', NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL"
     );
 
     res.json(result.recordset);
@@ -637,7 +641,7 @@ const getdepartement = async (req, res) => {
       .request()
       .input("mode", sql.NVarChar, "DD")
       .input("attributeheader_code", sql.NVarChar, attributeheader_code)
-      .query("EXEC sp_attribute_Info @mode,'',@attributeheader_code,'','', '' ,'','', NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL");
+      .query("EXEC sp_attribute_Info_test @mode,'',@attributeheader_code,'','', '' ,0,'','', NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL");
     if (result.recordset.length > 0) {
       res.status(200).json(result.recordset); // 200 OK if data is found
     } else {
@@ -765,7 +769,7 @@ const getDaterange = async (req, res) => {
   try {
     await connection.connectToDatabase();
     const result = await sql.query(
-      "EXEC sp_attribute_Info 'DR','',' Date Range','','', '' ,'','', NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL"
+      "EXEC sp_attribute_Info_test 'DR','',' Date Range','','', '' ,0,'','', NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL"
     );
     if (result.recordset.length > 0) {
       res.status(200).json(result.recordset); // 200 OK if data is found
@@ -782,7 +786,7 @@ const getplan = async (req, res) => {
   try {
     await connection.connectToDatabase();
     const result = await sql.query(
-      "EXEC sp_attribute_Info 'F','','Plan','','', '' ,'','', NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL"
+      "EXEC sp_attribute_Info_test 'F','','Plan','','', '' ,0,'','', NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL"
     );
     if (result.recordset.length > 0) {
       res.status(200).json(result.recordset); // 200 OK if data is found
@@ -1292,7 +1296,7 @@ const getScreens = async (req, res) => {
   try {
     await connection.connectToDatabase();
     const result = await sql.query(
-      "EXEC sp_attribute_Info 'F','','Screens','',' ', ' ','','' , NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL"
+      "EXEC sp_attribute_Info_test 'F','','Screens','',' ', ' ',0,'','' , NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL"
     );
 
     if (result.recordset.length > 0) {
@@ -1310,7 +1314,7 @@ const getpermission = async (req, res) => {
   try {
     await connection.connectToDatabase();
     const result = await sql.query(
-      "EXEC sp_attribute_Info 'F','','Permission','',' ', ' ','','' , NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL"
+      "EXEC sp_attribute_Info_test 'F','','Permission','',' ', ' ',0,'','' , NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL"
     );
 
     if (result.recordset.length > 0) {
@@ -1328,7 +1332,7 @@ const getRemarks = async (req, res) => {
   try {
     await connection.connectToDatabase();
     const result = await sql.query(
-      "EXEC sp_attribute_Info 'F','','Remarks','',' ', ' ','','' , NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL"
+      "EXEC sp_attribute_Info_test 'F','','Remarks','',' ', ' ',0,'','' , NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL"
     );
 
     if (result.recordset.length > 0) {
@@ -1349,7 +1353,7 @@ const getLoginorout = async (req, res) => {
   try {
     await connection.connectToDatabase();
     const result = await sql.query(
-      "EXEC sp_attribute_Info 'F','','Log IN/OUT','','', '' ,'','', NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL"
+      "EXEC sp_attribute_Info_test 'F','','Log IN/OUT','','', '' ,0,'','', NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL"
     );
 
     if (result.recordset.length > 0) {
@@ -1387,7 +1391,7 @@ const getUsertype = async (req, res) => {
   try {
     await connection.connectToDatabase();
     const result = await sql.query(
-      `EXEC sp_attribute_Info 'F','','User Type', '','','','','',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL
+      `EXEC sp_attribute_Info_test 'F','','User Type', '','','',0,'','',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL
         `
     );
 
@@ -2040,7 +2044,7 @@ const getMsgStatus = async (req, res) => {
   try {
     await connection.connectToDatabase();
     const result = await sql.query(
-      `EXEC sp_attribute_Info 'F','','Msg Status', '','','','','',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL
+      `EXEC sp_attribute_Info_test 'F','','Msg Status', '','','',0,'','',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL
             `
     );
 
@@ -2311,7 +2315,7 @@ const getDashboardPlan = async (req, res) => {
   try {
     await connection.connectToDatabase();
     const result = await sql.query(
-      "EXEC sp_attribute_Info 'DP','','Plan','','', '' ,'','', NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL"
+      "EXEC sp_attribute_Info_test 'DP','','Plan','','', '' ,0,'','', NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL"
     );
     if (result.recordset.length > 0) {
       res.status(200).json(result.recordset); // 200 OK if data is found

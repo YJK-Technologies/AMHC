@@ -25,6 +25,7 @@ const AttriDetInput = () => {
   const [selectedHeader, setSelectedHeader] = useState('Cash');
   const [codedrop, setCodedrop] = useState([]);
   const [descriptions, setDescriptions] = useState("");
+  const [orderNo, setOrderNo] = useState("");
 
   const handleNavigatesToForm = () => {
     navigate("/AttriDetInput", { state: { mode: "create" } }); // Pass selectedRows as props to the Input component
@@ -74,6 +75,7 @@ const AttriDetInput = () => {
           attributedetails_code,
           attributedetails_name,
           descriptions,
+          order_no : orderNo,
           created_by: sessionStorage.getItem('selectedUserCode')
         }),
       });
@@ -231,6 +233,26 @@ const AttriDetInput = () => {
                 
               </div>
             </div>
+            <div className="col-md-3 form-group  mb-2">
+            <div class="exp-form-floating">
+            <div class="d-flex justify-content-start">
+                <div>
+                   <label for="state" class="exp-form-labels">
+                 Order No 
+                  
+                </label>
+                </div> 
+                </div><input
+                id="emailid"
+                class="exp-input-field form-control"
+                type="text"
+                placeholder=""
+                autoComplete='off'
+                value={orderNo}
+                onChange={(e) => setOrderNo(e.target.value)}
+              />  
+            </div>
+          </div> 
             <div className="col-md-3 form-group  mb-2">
             <div class="exp-form-floating">
             <div class="d-flex justify-content-start">
