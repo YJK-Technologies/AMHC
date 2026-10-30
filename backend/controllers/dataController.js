@@ -17,6 +17,8 @@ const twilioClient = twilio(accountSid, authToken);
 const PHONE_NUMBER_ID = process.env.WHATSAPP_PHONE_NUMBER_ID;
 const ACCESS_TOKEN = process.env.WHATSAPP_ACCESS_TOKEN;
 const API_VERSION = process.env.META_API_VERSION;
+const dailyUserSessions = new Map();
+let currentStoredDate = new Date().toISOString().split('T')[0];
 
 
 const login = async (req, res) => {
@@ -2555,7 +2557,8 @@ const addFeedbackFormtest = async (req, res) => {
 
 /**
  * Webhook Endpoint to handle incoming WhatsApp Messages
- */
+*/
+/* Code Command by Pavun On 30-10-2026 
 const receiveWhatsAppMessage = async (req, res) => {
   try {
     const body = req.body;
@@ -2606,10 +2609,12 @@ const receiveWhatsAppMessage = async (req, res) => {
     res.sendStatus(500);
   }
 };
+*/
 
 /**
  * Send Interactive Menu with Reply Buttons
- */
+*/
+/* Code Command by Pavun On 30-10-2026 
 const sendCompanyMenu = async (recipientPhone) => {
   const payload = {
     messaging_product: "whatsapp",
@@ -2657,10 +2662,12 @@ const sendCompanyMenu = async (recipientPhone) => {
 
   await callWhatsAppApi(payload);
 };
+*/
 
 /**
  * Send details and pricing based on selected option
- */
+*/
+/* Code Command by Pavun On 30-10-2026 
 const handleProductDetailsResponse = async (recipientPhone, selectedOptionId) => {
   let detailsText = "";
 
@@ -2695,6 +2702,268 @@ const handleProductDetailsResponse = async (recipientPhone, selectedOptionId) =>
 
   await sendTextMessage(recipientPhone, detailsText);
 };
+*/
+
+/**
+ * Helper to send simple text messages
+*/
+/* Code Command by Pavun On 30-10-2026 
+const sendTextMessage = async (recipientPhone, textResponse) => {
+  const payload = {
+    messaging_product: "whatsapp",
+    to: recipientPhone.replace(/\D/g, ''),
+    type: "text",
+    text: { body: textResponse }
+  };
+
+  await callWhatsAppApi(payload);
+};
+*/
+
+/**
+ * Meta Graph API HTTP Caller
+*/
+/* Code Command by Pavun On 30-10-2026 
+const callWhatsAppApi = async (payload) => {
+  try {
+    const response = await fetch(`https://graph.facebook.com/v20.0/${PHONE_NUMBER_ID}/messages`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${ACCESS_TOKEN}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error("Meta API Error Response:", JSON.stringify(data, null, 2));
+      throw new Error(data.error?.message || "Failed to send WhatsApp message");
+    }
+
+    console.log("Message sent successfully:", data);
+  } catch (error) {
+    console.error("Error in callWhatsAppApi:", error.message || error);
+  }
+};
+*/
+
+/* Code Added by Pavun on 2026-10-30 */
+const receiveWhatsAppMessage = async (req, res) => {
+  try {
+    const body = req.body;
+
+    if (body.object === "whatsapp_business_account") {
+      const entry = body.entry?.[0];
+      const message = entry?.changes?.[0]?.value?.messages?.[0];
+
+      if (message) {
+        const senderPhone = message.from;
+
+        // Check if this is the user's first message today
+        const isFirstTimeToday = await checkAndLogUserSession(senderPhone);
+
+        if (isFirstTimeToday) {
+          // Send interactive list menu fetched dynamically from DB
+          await sendDynamicListMenu(senderPhone, "Welcome to Government Multi Super Speciality Hospital, Omandurar! 🙏 How can we assist you today?");
+        } 
+        // Handle Interactive List / Button Selection
+        else if (message.type === "interactive") {
+          // Support both list replies and button replies
+          const selectedId = message.interactive?.list_reply?.id || message.interactive?.button_reply?.id;
+          console.log(`Selection by ${senderPhone}: ${selectedId}`);
+
+          await handleDynamicDetailsResponse(senderPhone, selectedId);
+        } 
+        // Handle Text Input
+        else if (message.type === "text") {
+          const textMsg = message.text?.body?.toLowerCase().trim();
+
+          if (textMsg.includes("menu") || textMsg.includes("hi") || textMsg.includes("hello")) {
+            await sendDynamicListMenu(senderPhone, "Here is our main menu. Please select a service below:");
+          } else {
+            // Fallback: match text against DB options or show menu
+            const matchedId = await matchKeywordFromDatabase(textMsg);
+            if (matchedId) {
+              await handleDynamicDetailsResponse(senderPhone, matchedId);
+            } else {
+              await sendDynamicListMenu(senderPhone, "I didn't quite catch that. Please select an option from our menu:");
+            }
+          }
+        }
+      }
+
+      res.sendStatus(200);
+    } else {
+      res.sendStatus(404);
+    }
+  } catch (err) {
+    console.error("Webhook POST Error:", err);
+    res.sendStatus(500);
+  }
+};
+
+/**
+ * Fetch all menu items from SQL Server and send an Interactive List Message
+ */
+const sendDynamicListMenu = async (recipientPhone, greetingText) => {
+  try {
+    const request = new sql.Request();
+    request.input('headerCode', sql.VarChar, 'OmandurarMenu');
+
+    const result = await request.query(`
+      SELECT attributedetails_code, attributedetails_name, descriptions 
+      FROM tbl_attribute_details_info 
+      WHERE attributeheader_code = @headerCode 
+      ORDER BY ISNULL(order_no, 99) ASC
+    `);
+
+    // Map database rows into WhatsApp List rows (supports up to 10 items)
+    const rows = result.recordset.map(item => ({
+      id: item.attributedetails_code,
+      title: item.attributedetails_name.substring(0, 24), // Max 24 chars for WhatsApp titles
+      description: "" // Optional short subtitle if needed
+    }));
+
+    const payload = {
+      messaging_product: "whatsapp",
+      to: recipientPhone.replace(/\D/g, ''),
+      type: "interactive",
+      interactive: {
+        type: "list",
+        header: {
+          type: "text",
+          text: "Omandurar Hospital Helpdesk"
+        },
+        body: {
+          text: greetingText
+        },
+        footer: {
+          text: "Tap below to view services"
+        },
+        action: {
+          button: "Select Service",
+          sections: [
+            {
+              title: "Hospital Services",
+              rows: rows
+            }
+          ]
+        }
+      }
+    };
+
+    await callWhatsAppApi(payload);
+  } catch (err) {
+    console.error("Error sending dynamic list menu:", err);
+  }
+};
+
+/**
+ * Fetch specific details from DB based on user selection and reply
+ */
+const handleDynamicDetailsResponse = async (recipientPhone, selectedCode) => {
+  try {
+    const request = new sql.Request();
+    request.input('headerCode', sql.VarChar, 'OmandurarMenu');
+    request.input('detailCode', sql.VarChar, selectedCode);
+
+    const result = await request.query(`
+      SELECT descriptions 
+      FROM tbl_attribute_details_info 
+      WHERE attributeheader_code = @headerCode 
+        AND attributedetails_code = @detailCode
+    `);
+
+    let responseText = "Invalid option selected.";
+
+    if (result.recordset.length > 0) {
+      responseText = result.recordset[0].descriptions + `\n\nType *'Menu'* anytime to return to the main options.`;
+    }
+
+    await sendTextMessage(recipientPhone, responseText);
+  } catch (err) {
+    console.error("Error fetching details:", err);
+    await sendTextMessage(recipientPhone, "An error occurred while fetching details. Please try again.");
+  }
+};
+
+/**
+ * Match typed text keywords against database service names
+ */
+const matchKeywordFromDatabase = async (messageText) => {
+  try {
+    const request = new sql.Request();
+    request.input('headerCode', sql.VarChar, 'OmandurarMenu');
+
+    const result = await request.query(`
+      SELECT attributedetails_code, attributedetails_name 
+      FROM tbl_attribute_details_info 
+      WHERE attributeheader_code = @headerCode
+    `);
+
+    for (const row of result.recordset) {
+      if (messageText.includes(row.attributedetails_name.toLowerCase())) {
+        return row.attributedetails_code;
+      }
+    }
+    return null;
+  } catch (err) {
+    console.error("Error matching keyword:", err);
+    return null;
+  }
+};
+
+/**
+ * Session tracker to check if user messaged for the first time today
+ */
+// const checkAndLogUserSession = async (phoneNumber) => {
+//   try {
+//     const request = new sql.Request();
+//     request.input('phone', sql.VarChar, phoneNumber);
+
+//     const result = await request.query(`
+//       SELECT COUNT(*) as msgCount 
+//       FROM tbl_whatsapp_user_sessions 
+//       WHERE phone_number = @phone AND CAST(last_message_time AS DATE) = CAST(GETDATE() AS DATE)
+//     `);
+
+//     if (result.recordset[0].msgCount === 0) {
+//       await request.query(`
+//         MERGE tbl_whatsapp_user_sessions AS target
+//         USING (SELECT @phone AS phone_number) AS source
+//         ON (target.phone_number = source.phone_number)
+//         WHEN MATCHED THEN UPDATE SET last_message_time = GETDATE()
+//         WHEN NOT MATCHED THEN INSERT (phone_number, last_message_time) VALUES (@phone, GETDATE());
+//       `);
+//       return true;
+//     }
+//     return false;
+//   } catch (err) {
+//     console.error("Session check error:", err);
+//     return false;
+//   }
+// };
+
+const checkAndLogUserSession = (phoneNumber) => {
+  const todayDateStr = new Date().toISOString().split('T')[0];
+  
+  // If a new day has started, clear yesterday's records automatically
+  if (currentStoredDate !== todayDateStr) {
+    dailyUserSessions.clear();
+    currentStoredDate = todayDateStr;
+  }
+
+  const lastActiveDate = dailyUserSessions.get(phoneNumber);
+
+  if (lastActiveDate !== todayDateStr) {
+    dailyUserSessions.set(phoneNumber, todayDateStr);
+    return true; // First message today!
+  }
+  
+  return false; // Already messaged today
+};
 
 /**
  * Helper to send simple text messages
@@ -2706,7 +2975,6 @@ const sendTextMessage = async (recipientPhone, textResponse) => {
     type: "text",
     text: { body: textResponse }
   };
-
   await callWhatsAppApi(payload);
 };
 
@@ -2736,6 +3004,7 @@ const callWhatsAppApi = async (payload) => {
     console.error("Error in callWhatsAppApi:", error.message || error);
   }
 };
+/* Code Added by Pavun on 2026-10-30 */
 
 module.exports = {
   login,
