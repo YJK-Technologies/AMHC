@@ -2761,34 +2761,46 @@ const receiveWhatsAppMessage = async (req, res) => {
       if (message) {
         const senderPhone = message.from;
 
-        // Check if this is the user's first message today
-        const isFirstTimeToday = await checkAndLogUserSession(senderPhone);
+        // Check if this is the user's first message today (using In-Memory Map)
+        const isFirstTimeToday = checkAndLogUserSession(senderPhone);
 
         if (isFirstTimeToday) {
-          // Send interactive list menu fetched dynamically from DB
-          await sendDynamicListMenu(senderPhone, "Welcome to Government Multi Super Speciality Hospital, Omandurar! 🙏 How can we assist you today?");
-        } 
+          // Send main interactive list menu fetched dynamically from DB ('ChatbotMenu')
+          await sendDynamicListMenu(senderPhone, 'ChatbotMenu', "Welcome to Government Multi Super Speciality Hospital, Omandurar! 🙏 How can we assist you today?");
+        }
         // Handle Interactive List / Button Selection
         else if (message.type === "interactive") {
-          // Support both list replies and button replies
           const selectedId = message.interactive?.list_reply?.id || message.interactive?.button_reply?.id;
           console.log(`Selection by ${senderPhone}: ${selectedId}`);
 
-          await handleDynamicDetailsResponse(senderPhone, selectedId);
-        } 
+          // If user clicked "Plans & Packages", open the Plans Sub-Menu!
+          if (selectedId === "btn_plans") {
+            await sendDynamicListMenu(senderPhone, 'Plan', "📋 *Available Health Plans & Packages*\n\nPlease select a plan below to view details:");
+          } else {
+            // Handle regular service details or plan details response
+            await handleDynamicDetailsResponse(senderPhone, selectedId);
+          }
+        }
         // Handle Text Input
         else if (message.type === "text") {
           const textMsg = message.text?.body?.toLowerCase().trim();
 
           if (textMsg.includes("menu") || textMsg.includes("hi") || textMsg.includes("hello")) {
-            await sendDynamicListMenu(senderPhone, "Here is our main menu. Please select a service below:");
+            await sendDynamicListMenu(senderPhone, 'ChatbotMenu', "Here is our main menu. Please select a service below:");
+          } else if (textMsg.includes("plan") || textMsg.includes("package")) {
+            // If user types 'plan', open the Plan sub-menu directly
+            await sendDynamicListMenu(senderPhone, 'Plan', "📋 *Available Health Plans & Packages*\n\nPlease select a plan below to view details:");
           } else {
-            // Fallback: match text against DB options or show menu
+            // Match text against DB options or show menu
             const matchedId = await matchKeywordFromDatabase(textMsg);
             if (matchedId) {
-              await handleDynamicDetailsResponse(senderPhone, matchedId);
+              if (matchedId === "btn_plans") {
+                await sendDynamicListMenu(senderPhone, 'Plan', "📋 *Available Health Plans & Packages*\n\nPlease select a plan below to view details:");
+              } else {
+                await handleDynamicDetailsResponse(senderPhone, matchedId);
+              }
             } else {
-              await sendDynamicListMenu(senderPhone, "I didn't quite catch that. Please select an option from our menu:");
+              await sendDynamicListMenu(senderPhone, 'ChatbotMenu', "I didn't quite catch that. Please select an option from our menu:");
             }
           }
         }
@@ -2805,25 +2817,26 @@ const receiveWhatsAppMessage = async (req, res) => {
 };
 
 /**
- * Fetch all menu items from SQL Server and send an Interactive List Message
+ * Reusable function to send any dynamic list menu based on header code ('ChatbotMenu' or 'Plan')
  */
-const sendDynamicListMenu = async (recipientPhone, greetingText) => {
+const sendDynamicListMenu = async (recipientPhone, headerCode, menuTitleText) => {
   try {
-    const request = new sql.Request();
-    request.input('headerCode', sql.VarChar, 'ChatbotMenu');
+    const pool = await connection.connectToDatabase();
 
-    const result = await request.query(`
-      SELECT attributedetails_code, attributedetails_name, descriptions 
-      FROM tbl_attribute_details_info 
-      WHERE attributeheader_code = @headerCode 
-      ORDER BY ISNULL(order_no, 99) ASC
-    `);
+    const result = await pool.request()
+      .input('headerCode', sql.VarChar, headerCode)
+      .query(`
+        SELECT attributedetails_code, attributedetails_name, descriptions 
+        FROM tbl_attribute_details_info 
+        WHERE attributeheader_code = @headerCode 
+        ORDER BY ISNULL(order_no, 99) ASC
+      `);
 
-    // Map database rows into WhatsApp List rows (supports up to 10 items)
+    // WhatsApp list supports up to 10 rows
     const rows = result.recordset.map(item => ({
       id: item.attributedetails_code,
       title: item.attributedetails_name.substring(0, 24), // Max 24 chars for WhatsApp titles
-      description: "" // Optional short subtitle if needed
+      description: ""
     }));
 
     const payload = {
@@ -2834,19 +2847,19 @@ const sendDynamicListMenu = async (recipientPhone, greetingText) => {
         type: "list",
         header: {
           type: "text",
-          text: "Omandurar Hospital Helpdesk"
+          text: headerCode === 'Plan' ? "Hospital Plans" : "Omandurar Hospital Helpdesk"
         },
         body: {
-          text: greetingText
+          text: menuTitleText
         },
         footer: {
-          text: "Tap below to view services"
+          text: "Tap below to view options"
         },
         action: {
-          button: "Select Service",
+          button: headerCode === 'Plan' ? "Select Plan" : "Select Service",
           sections: [
             {
-              title: "Hospital Services",
+              title: headerCode === 'Plan' ? "Health Packages" : "Hospital Services",
               rows: rows
             }
           ]
@@ -2861,25 +2874,25 @@ const sendDynamicListMenu = async (recipientPhone, greetingText) => {
 };
 
 /**
- * Fetch specific details from DB based on user selection and reply
+ * Fetch specific details from DB based on user selection (works for both ChatbotMenu and Plan)
  */
 const handleDynamicDetailsResponse = async (recipientPhone, selectedCode) => {
   try {
-    const request = new sql.Request();
-    request.input('headerCode', sql.VarChar, 'ChatbotMenu');
-    request.input('detailCode', sql.VarChar, selectedCode);
+    const pool = await connection.connectToDatabase();
 
-    const result = await request.query(`
-      SELECT descriptions 
-      FROM tbl_attribute_details_info 
-      WHERE attributeheader_code = @headerCode 
-        AND attributedetails_code = @detailCode
-    `);
+    // Search across both headers so it can find items whether they belong to ChatbotMenu or Plan
+    const result = await pool.request()
+      .input('detailCode', sql.VarChar, selectedCode)
+      .query(`
+        SELECT descriptions 
+        FROM tbl_attribute_details_info 
+        WHERE attributedetails_code = @detailCode
+      `);
 
     let responseText = "Invalid option selected.";
 
     if (result.recordset.length > 0) {
-      responseText = result.recordset[0].descriptions + `\n\nType *'Menu'* anytime to return to the main options.`;
+      responseText = result.recordset[0].descriptions + `\n\nType *'Menu'* to return to the main options or *'Plan'* for packages.`;
     }
 
     await sendTextMessage(recipientPhone, responseText);
@@ -2890,18 +2903,17 @@ const handleDynamicDetailsResponse = async (recipientPhone, selectedCode) => {
 };
 
 /**
- * Match typed text keywords against database service names
+ * Match typed text keywords against database service names or plans
  */
 const matchKeywordFromDatabase = async (messageText) => {
   try {
-    const request = new sql.Request();
-    request.input('headerCode', sql.VarChar, 'ChatbotMenu');
+    const pool = await connection.connectToDatabase();
 
-    const result = await request.query(`
-      SELECT attributedetails_code, attributedetails_name 
-      FROM tbl_attribute_details_info 
-      WHERE attributeheader_code = @headerCode
-    `);
+    const result = await pool.request()
+      .query(`
+        SELECT attributedetails_code, attributedetails_name 
+        FROM tbl_attribute_details_info
+      `);
 
     for (const row of result.recordset) {
       if (messageText.includes(row.attributedetails_name.toLowerCase())) {
@@ -2915,59 +2927,24 @@ const matchKeywordFromDatabase = async (messageText) => {
   }
 };
 
-/**
- * Session tracker to check if user messaged for the first time today
- */
-// const checkAndLogUserSession = async (phoneNumber) => {
-//   try {
-//     const request = new sql.Request();
-//     request.input('phone', sql.VarChar, phoneNumber);
-
-//     const result = await request.query(`
-//       SELECT COUNT(*) as msgCount 
-//       FROM tbl_whatsapp_user_sessions 
-//       WHERE phone_number = @phone AND CAST(last_message_time AS DATE) = CAST(GETDATE() AS DATE)
-//     `);
-
-//     if (result.recordset[0].msgCount === 0) {
-//       await request.query(`
-//         MERGE tbl_whatsapp_user_sessions AS target
-//         USING (SELECT @phone AS phone_number) AS source
-//         ON (target.phone_number = source.phone_number)
-//         WHEN MATCHED THEN UPDATE SET last_message_time = GETDATE()
-//         WHEN NOT MATCHED THEN INSERT (phone_number, last_message_time) VALUES (@phone, GETDATE());
-//       `);
-//       return true;
-//     }
-//     return false;
-//   } catch (err) {
-//     console.error("Session check error:", err);
-//     return false;
-//   }
-// };
-
 const checkAndLogUserSession = (phoneNumber) => {
   const todayDateStr = new Date().toISOString().split('T')[0];
-  
-  // If a new day has started, clear yesterday's records automatically
+
   if (currentStoredDate !== todayDateStr) {
     dailyUserSessions.clear();
     currentStoredDate = todayDateStr;
   }
 
-  const lastActiveDate = dailyUserSessions.get(phoneNumber);
+  const lastActiveData = dailyUserSessions.get(phoneNumber);
 
-  if (lastActiveDate !== todayDateStr) {
+  if (lastActiveData !== todayDateStr) {
     dailyUserSessions.set(phoneNumber, todayDateStr);
     return true; // First message today!
   }
-  
+
   return false; // Already messaged today
 };
 
-/**
- * Helper to send simple text messages
- */
 const sendTextMessage = async (recipientPhone, textResponse) => {
   const payload = {
     messaging_product: "whatsapp",
@@ -2978,9 +2955,6 @@ const sendTextMessage = async (recipientPhone, textResponse) => {
   await callWhatsAppApi(payload);
 };
 
-/**
- * Meta Graph API HTTP Caller
- */
 const callWhatsAppApi = async (payload) => {
   try {
     const response = await fetch(`https://graph.facebook.com/v20.0/${PHONE_NUMBER_ID}/messages`, {
