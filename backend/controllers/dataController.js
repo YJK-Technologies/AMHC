@@ -2810,7 +2810,7 @@ const receiveWhatsAppMessage = async (req, res) => {
 const sendDynamicListMenu = async (recipientPhone, greetingText) => {
   try {
     const request = new sql.Request();
-    request.input('headerCode', sql.VarChar, 'OmandurarMenu');
+    request.input('headerCode', sql.VarChar, 'ChatbotMenu');
 
     const result = await request.query(`
       SELECT attributedetails_code, attributedetails_name, descriptions 
@@ -2866,7 +2866,7 @@ const sendDynamicListMenu = async (recipientPhone, greetingText) => {
 const handleDynamicDetailsResponse = async (recipientPhone, selectedCode) => {
   try {
     const request = new sql.Request();
-    request.input('headerCode', sql.VarChar, 'OmandurarMenu');
+    request.input('headerCode', sql.VarChar, 'ChatbotMenu');
     request.input('detailCode', sql.VarChar, selectedCode);
 
     const result = await request.query(`
@@ -2895,7 +2895,7 @@ const handleDynamicDetailsResponse = async (recipientPhone, selectedCode) => {
 const matchKeywordFromDatabase = async (messageText) => {
   try {
     const request = new sql.Request();
-    request.input('headerCode', sql.VarChar, 'OmandurarMenu');
+    request.input('headerCode', sql.VarChar, 'ChatbotMenu');
 
     const result = await request.query(`
       SELECT attributedetails_code, attributedetails_name 
