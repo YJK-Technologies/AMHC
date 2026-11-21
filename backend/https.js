@@ -19,6 +19,7 @@ const sslOptions = {
 
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
+app.use("/pdf", express.static(path.join(__dirname, "pdf")));
 
 // Middleware
 app.use("/", dataRoutes);

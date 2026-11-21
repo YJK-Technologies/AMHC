@@ -8,7 +8,10 @@ const multer = require('multer')
 const http = require("http");
 const https = require('https');
 const querystring = require('querystring');
+const path = require("path");
 const upload = multer({ storage: multer.memoryStorage() });
+
+
 
 const accountSid = "AC310b839363f201619504003725860286";
 const authToken = "1641d6484f33fb67790da17909dce534";
@@ -2750,173 +2753,612 @@ const callWhatsAppApi = async (payload) => {
 */
 
 /* Code Added by Pavun on 2026-10-30 */
-const receiveWhatsAppMessage = async (req, res) => {
-  try {
-    const body = req.body;
+// const receiveWhatsAppMessage = async (req, res) => {
+//   try {
+//     const body = req.body;
 
-    if (body.object === "whatsapp_business_account") {
-      const entry = body.entry?.[0];
-      const message = entry?.changes?.[0]?.value?.messages?.[0];
+//     if (body.object === "whatsapp_business_account") {
+//       const entry = body.entry?.[0];
+//       const message = entry?.changes?.[0]?.value?.messages?.[0];
 
-      if (message) {
-        const senderPhone = message.from;
+//       if (message) {
+//         const senderPhone = message.from;
 
-        // Check if this is the user's first message today (using In-Memory Map)
-        const isFirstTimeToday = checkAndLogUserSession(senderPhone);
+//         // Check if this is the user's first message today (using In-Memory Map)
+//         const isFirstTimeToday = checkAndLogUserSession(senderPhone);
 
-        if (isFirstTimeToday) {
-          // Send main interactive list menu fetched dynamically from DB ('ChatbotMenu')
-          await sendDynamicListMenu(senderPhone, 'ChatbotMenu', "Welcome to Government Multi Super Speciality Hospital, Omandurar! 🙏 How can we assist you today?");
-        }
-        // Handle Interactive List / Button Selection
-        else if (message.type === "interactive") {
-          const selectedId = message.interactive?.list_reply?.id || message.interactive?.button_reply?.id;
-          console.log(`Selection by ${senderPhone}: ${selectedId}`);
+//         if (isFirstTimeToday) {
+//           // Send main interactive list menu fetched dynamically from DB ('ChatbotMenu')
+//           await sendDynamicListMenu(senderPhone, 'ChatbotMenu', "Welcome to Advance Master Health Checkup Hospital, Omandurar! 🙏 \nHow can we assist you today?");
+//         }
+//         // Handle Interactive List / Button Selection
+//         else if (message.type === "interactive") {
+//           const selectedId = message.interactive?.list_reply?.id || message.interactive?.button_reply?.id;
+//           console.log(`Selection by ${senderPhone}: ${selectedId}`);
 
-          // If user clicked "Plans & Packages", open the Plans Sub-Menu!
-          if (selectedId === "btn_plans") {
-            await sendDynamicListMenu(senderPhone, 'Plan', "📋 *Available Health Plans & Packages*\n\nPlease select a plan below to view details:");
-          } else {
-            // Handle regular service details or plan details response
-            await handleDynamicDetailsResponse(senderPhone, selectedId);
-          }
-        }
-        // Handle Text Input
-        else if (message.type === "text") {
-          const textMsg = message.text?.body?.toLowerCase().trim();
+//           // If user clicked "Plans & Packages", open the Plans Sub-Menu!
+//           if (selectedId === "btn_plans") {
+//             await sendDynamicListMenu(senderPhone, 'Plan', "📋 *Available Health Plans & Packages*\n\nPlease select a plan below to view details:");
+//           } else {
+//             // Handle regular service details or plan details response
+//             await handleDynamicDetailsResponse(senderPhone, selectedId);
+//           }
+//         }
+//         // Handle Text Input
+//         else if (message.type === "text") {
+//           const textMsg = message.text?.body?.toLowerCase().trim();
 
-          if (textMsg.includes("menu") || textMsg.includes("hi") || textMsg.includes("hello")) {
-            await sendDynamicListMenu(senderPhone, 'ChatbotMenu', "Here is our main menu. Please select a service below:");
-          } else if (textMsg.includes("plan") || textMsg.includes("package")) {
-            // If user types 'plan', open the Plan sub-menu directly
-            await sendDynamicListMenu(senderPhone, 'Plan', "📋 *Available Health Plans & Packages*\n\nPlease select a plan below to view details:");
-          } else {
-            // Match text against DB options or show menu
-            const matchedId = await matchKeywordFromDatabase(textMsg);
-            if (matchedId) {
-              if (matchedId === "btn_plans") {
-                await sendDynamicListMenu(senderPhone, 'Plan', "📋 *Available Health Plans & Packages*\n\nPlease select a plan below to view details:");
-              } else {
-                await handleDynamicDetailsResponse(senderPhone, matchedId);
-              }
-            } else {
-              await sendDynamicListMenu(senderPhone, 'ChatbotMenu', "I didn't quite catch that. Please select an option from our menu:");
-            }
-          }
-        }
-      }
+//           if (textMsg.includes("menu") || textMsg.includes("hi") || textMsg.includes("hello")) {
+//             await sendDynamicListMenu(senderPhone, 'ChatbotMenu', "Here is our main menu. Please select a service below:");
+//           } else if (textMsg.includes("plan") || textMsg.includes("package")) {
+//             // If user types 'plan', open the Plan sub-menu directly
+//             await sendDynamicListMenu(senderPhone, 'Plan', "📋 *Available Health Plans & Packages*\n\nPlease select a plan below to view details:");
+//           } else {
+//             // Match text against DB options or show menu
+//             const matchedId = await matchKeywordFromDatabase(textMsg);
+//             if (matchedId) {
+//               if (matchedId === "btn_plans") {
+//                 await sendDynamicListMenu(senderPhone, 'Plan', "📋 *Available Health Plans & Packages*\n\nPlease select a plan below to view details:");
+//               } else {
+//                 await handleDynamicDetailsResponse(senderPhone, matchedId);
+//               }
+//             } else {
+//               await sendDynamicListMenu(senderPhone, 'ChatbotMenu', "I didn't quite catch that. Please select an option from our menu:");
+//             }
+//           }
+//         }
+//       }
 
-      res.sendStatus(200);
-    } else {
-      res.sendStatus(404);
-    }
-  } catch (err) {
-    console.error("Webhook POST Error:", err);
-    res.sendStatus(500);
-  }
-};
+//       res.sendStatus(200);
+//     } else {
+//       res.sendStatus(404);
+//     }
+//   } catch (err) {
+//     console.error("Webhook POST Error:", err);
+//     res.sendStatus(500);
+//   }
+// };
 
 /**
  * Reusable function to send any dynamic list menu based on header code ('ChatbotMenu' or 'Plan')
  */
-const sendDynamicListMenu = async (recipientPhone, headerCode, menuTitleText) => {
+// const sendDynamicListMenu = async (recipientPhone, headerCode, menuTitleText) => {
+//   try {
+//     const pool = await connection.connectToDatabase();
+
+//     const result = await pool.request()
+//       .input('headerCode', sql.VarChar, headerCode)
+//       .query(`
+//         SELECT attributedetails_code, attributedetails_name, descriptions 
+//         FROM tbl_attribute_details_info 
+//         WHERE attributeheader_code = @headerCode 
+//         ORDER BY ISNULL(order_no, 99) ASC
+//       `);
+
+//     // WhatsApp list supports up to 10 rows
+//     const rows = result.recordset.map(item => ({
+//       id: item.attributedetails_code,
+//       title: item.attributedetails_name.substring(0, 24), // Max 24 chars for WhatsApp titles
+//       description: ""
+//     }));
+
+//     const payload = {
+//       messaging_product: "whatsapp",
+//       to: recipientPhone.replace(/\D/g, ''),
+//       type: "interactive",
+//       interactive: {
+//         type: "list",
+//         header: {
+//           type: "text",
+//           text: headerCode === 'Plan' ? "Hospital Plans" : "AMHC Helpdesk"
+//         },
+//         body: {
+//           text: menuTitleText
+//         },
+//         footer: {
+//           text: "Tap below to view options"
+//         },
+//         action: {
+//           button: headerCode === 'Plan' ? "Select Plan" : "Select Service",
+//           sections: [
+//             {
+//               title: headerCode === 'Plan' ? "Health Packages" : "Hospital Services",
+//               rows: rows
+//             }
+//           ]
+//         }
+//       }
+//     };
+
+//     await callWhatsAppApi(payload);
+//   } catch (err) {
+//     console.error("Error sending dynamic list menu:", err);
+//   }
+// };
+
+/**
+ * Fetch specific details from DB based on user selection (works for both ChatbotMenu and Plan)
+ */
+// const handleDynamicDetailsResponse = async (recipientPhone, selectedCode) => {
+//   try {
+//     const pool = await connection.connectToDatabase();
+
+//     // Search across both headers so it can find items whether they belong to ChatbotMenu or Plan
+//     const result = await pool.request()
+//       .input('detailCode', sql.VarChar, selectedCode)
+//       .query(`
+//         SELECT descriptions 
+//         FROM tbl_attribute_details_info 
+//         WHERE attributedetails_code = @detailCode
+//       `);
+
+//     let responseText = "Invalid option selected.";
+
+//     if (result.recordset.length > 0) {
+//       responseText = result.recordset[0].descriptions + `\n\nType *'Menu'* to return to the main options or *'Plan'* for packages.`;
+//     }
+
+//     await sendTextMessage(recipientPhone, responseText);
+//   } catch (err) {
+//     console.error("Error fetching details:", err);
+//     await sendTextMessage(recipientPhone, "An error occurred while fetching details. Please try again.");
+//   }
+// };
+
+/**
+ * Match typed text keywords against database service names or plans
+ */
+// const matchKeywordFromDatabase = async (messageText) => {
+//   try {
+//     const pool = await connection.connectToDatabase();
+
+//     const result = await pool.request()
+//       .query(`
+//         SELECT attributedetails_code, attributedetails_name 
+//         FROM tbl_attribute_details_info
+//       `);
+
+//     for (const row of result.recordset) {
+//       if (messageText.includes(row.attributedetails_name.toLowerCase())) {
+//         return row.attributedetails_code;
+//       }
+//     }
+//     return null;
+//   } catch (err) {
+//     console.error("Error matching keyword:", err);
+//     return null;
+//   }
+// };
+
+// const checkAndLogUserSession = (phoneNumber) => {
+//   const todayDateStr = new Date().toISOString().split('T')[0];
+
+//   if (currentStoredDate !== todayDateStr) {
+//     dailyUserSessions.clear();
+//     currentStoredDate = todayDateStr;
+//   }
+
+//   const lastActiveData = dailyUserSessions.get(phoneNumber);
+
+//   if (lastActiveData !== todayDateStr) {
+//     dailyUserSessions.set(phoneNumber, todayDateStr);
+//     return true; // First message today!
+//   }
+
+//   return false; // Already messaged today
+// };
+
+// const sendTextMessage = async (recipientPhone, textResponse) => {
+//   const payload = {
+//     messaging_product: "whatsapp",
+//     to: recipientPhone.replace(/\D/g, ''),
+//     type: "text",
+//     text: { body: textResponse }
+//   };
+//   await callWhatsAppApi(payload);
+// };
+
+// const callWhatsAppApi = async (payload) => {
+//   try {
+//     const response = await fetch(`https://graph.facebook.com/v20.0/${PHONE_NUMBER_ID}/messages`, {
+//       method: "POST",
+//       headers: {
+//         "Authorization": `Bearer ${ACCESS_TOKEN}`,
+//         "Content-Type": "application/json",
+//       },
+//       body: JSON.stringify(payload),
+//     });
+
+//     const data = await response.json();
+
+//     if (!response.ok) {
+//       console.error("Meta API Error Response:", JSON.stringify(data, null, 2));
+//       throw new Error(data.error?.message || "Failed to send WhatsApp message");
+//     }
+
+//     console.log("Message sent successfully:", data);
+//   } catch (error) {
+//     console.error("Error in callWhatsAppApi:", error.message || error);
+//   }
+// };
+/* Code Added by Pavun on 2026-10-30 */
+
+/* Code Added by Pavun on 21-11-2026 */
+// datacontroller.js
+
+// Session store per phone number:
+// { date: 'YYYY-MM-DD', step: 'IDLE' | 'AWAITING_APPOINTMENT_DETAILS' }
+const userSessionState = new Map();
+
+const getTodayUtcDateStr = () => new Date().toISOString().split("T")[0];
+
+const getOrInitUserSession = (phoneNumber) => {
+  const todayDateStr = getTodayUtcDateStr();
+
+  if (currentStoredDate !== todayDateStr) {
+    userSessionState.clear();
+    currentStoredDate = todayDateStr;
+  }
+
+  let session = userSessionState.get(phoneNumber);
+  const isFirstTimeToday = !session || session.date !== todayDateStr;
+
+  if (!session || session.date !== todayDateStr) {
+    session = { date: todayDateStr, step: "IDLE" };
+    userSessionState.set(phoneNumber, session);
+  }
+
+  return { session, isFirstTimeToday };
+};
+
+/**
+ * Fetch header title and optional backend-stored list UI strings from DB
+ */
+const MHC_PAMPHLET_URL = "https://erpdev.yjktechnologies.com:5503/pdf/MHC%20PAMPLET.pdf";
+const MHC_PAMPHLET_FILENAME = "AMHC PAMPLET.pdf";
+const MHC_PAMPHLET_CAPTION = "AMHC PAMPLET";
+
+const getMenuConfigFromDatabase = async (pool, headerCode, fallbackBodyText) => {
+  const hdrResult = await pool
+    .request()
+    .input("headerCode", sql.VarChar, headerCode)
+    .query(`
+      SELECT TOP 1 attributeheader_name
+      FROM tbl_attribute_info_hdr
+      WHERE attributeheader_code = @headerCode
+        AND ISNULL(status, 'ACTIVE') = 'ACTIVE'
+    `);
+
+  const cfgResult = await pool
+    .request()
+    .input("headerCode", sql.VarChar, headerCode)
+    .query(`
+      SELECT attributedetails_code, descriptions
+      FROM tbl_attribute_details_info
+      WHERE attributedetails_code IN (
+        CONCAT('CFG_BODY_', UPPER(@headerCode)),
+        CONCAT('CFG_FOOTER_', UPPER(@headerCode)),
+        CONCAT('CFG_BTN_', UPPER(@headerCode)),
+        CONCAT('CFG_SEC_', UPPER(@headerCode))
+      )
+    `);
+
+  const cfgMap = new Map();
+  for (const row of cfgResult.recordset) {
+    cfgMap.set(row.attributedetails_code, row.descriptions);
+  }
+
+  const upperCode = String(headerCode || "").toUpperCase();
+  const isPlan = upperCode === "PLAN";
+
+  const bodyText =
+    cfgMap.get(`CFG_BODY_${upperCode}`) ||
+    fallbackBodyText ||
+    "Please select an option below:";
+
+  return {
+    headerText:
+      hdrResult.recordset[0]?.attributeheader_name ||
+      (isPlan ? "Hospital Plans" : headerCode),
+    bodyText,
+    footerText:
+      cfgMap.get(`CFG_FOOTER_${upperCode}`) || "Tap below to view options",
+    buttonText:
+      cfgMap.get(`CFG_BTN_${upperCode}`) ||
+      (isPlan ? "Select Plan" : "Select Service"),
+    sectionTitle:
+      cfgMap.get(`CFG_SEC_${upperCode}`) ||
+      (isPlan ? "Health Packages" : "Hospital Services"),
+  };
+};
+
+/**
+ * Send PDF document attachment via WhatsApp Cloud API
+ */
+const sendDocumentMessage = async (
+  recipientPhone,
+  documentUrl,
+  filename = MHC_PAMPHLET_FILENAME,
+  caption = MHC_PAMPHLET_CAPTION
+) => {
+  const payload = {
+    messaging_product: "whatsapp",
+    to: String(recipientPhone).replace(/\D/g, ""),
+    type: "document",
+    document: {
+      link: documentUrl,
+      filename,
+      ...(caption ? { caption } : {}),
+    },
+  };
+
+  await callWhatsAppApi(payload);
+};
+
+/**
+ * Reusable function to send any dynamic list menu based on headerCode ('ChatbotMenu', 'Plan', etc.)
+ */
+const sendDynamicListMenu = async (recipientPhone, headerCode, fallbackBodyText = "") => {
   try {
     const pool = await connection.connectToDatabase();
 
-    const result = await pool.request()
-      .input('headerCode', sql.VarChar, headerCode)
+    const menuConfig = await getMenuConfigFromDatabase(pool, headerCode, fallbackBodyText);
+
+    const result = await pool
+      .request()
+      .input("headerCode", sql.VarChar, headerCode)
       .query(`
-        SELECT attributedetails_code, attributedetails_name, descriptions 
-        FROM tbl_attribute_details_info 
-        WHERE attributeheader_code = @headerCode 
+        SELECT attributedetails_code, attributedetails_name, descriptions
+        FROM tbl_attribute_details_info
+        WHERE attributeheader_code = @headerCode
+          AND attributedetails_code NOT LIKE 'CFG_%'
+          AND attributedetails_code <> 'APPT_CONFIRM'
         ORDER BY ISNULL(order_no, 99) ASC
       `);
 
-    // WhatsApp list supports up to 10 rows
-    const rows = result.recordset.map(item => ({
+    // WhatsApp interactive list supports up to 10 rows
+    const rows = result.recordset.slice(0, 10).map((item) => ({
       id: item.attributedetails_code,
-      title: item.attributedetails_name.substring(0, 24), // Max 24 chars for WhatsApp titles
-      description: ""
+      title: String(item.attributedetails_name || "").substring(0, 24),
+      description: "",
     }));
 
     const payload = {
       messaging_product: "whatsapp",
-      to: recipientPhone.replace(/\D/g, ''),
+      to: String(recipientPhone).replace(/\D/g, ""),
       type: "interactive",
       interactive: {
         type: "list",
         header: {
           type: "text",
-          text: headerCode === 'Plan' ? "Hospital Plans" : "Omandurar Hospital Helpdesk"
+          text: String(menuConfig.headerText).substring(0, 60),
         },
         body: {
-          text: menuTitleText
+          text: menuConfig.bodyText,
         },
         footer: {
-          text: "Tap below to view options"
+          text: String(menuConfig.footerText).substring(0, 60),
         },
         action: {
-          button: headerCode === 'Plan' ? "Select Plan" : "Select Service",
+          button: String(menuConfig.buttonText).substring(0, 20),
           sections: [
             {
-              title: headerCode === 'Plan' ? "Health Packages" : "Hospital Services",
-              rows: rows
-            }
-          ]
-        }
-      }
+              title: String(menuConfig.sectionTitle).substring(0, 24),
+              rows,
+            },
+          ],
+        },
+      },
     };
 
     await callWhatsAppApi(payload);
+
+    // Send PDF document attachment along with main ChatbotMenu
+    if (String(headerCode || "").toUpperCase() === "CHATBOTMENU") {
+      await sendDocumentMessage(
+        recipientPhone,
+        MHC_PAMPHLET_URL,
+        MHC_PAMPHLET_FILENAME,
+        MHC_PAMPHLET_CAPTION
+      );
+    }
   } catch (err) {
     console.error("Error sending dynamic list menu:", err);
   }
 };
 
 /**
- * Fetch specific details from DB based on user selection (works for both ChatbotMenu and Plan)
+ * Fetch detail description from DB for a given attributedetails_code
  */
-const handleDynamicDetailsResponse = async (recipientPhone, selectedCode) => {
+const getDetailDescriptionFromDatabase = async (pool, code) => {
+  const result = await pool
+    .request()
+    .input("detailCode", sql.VarChar, code)
+    .query(`
+      SELECT TOP 1 descriptions
+      FROM tbl_attribute_details_info
+      WHERE attributedetails_code = @detailCode
+    `);
+
+  return result.recordset[0]?.descriptions || null;
+};
+
+/**
+ * Parse and validate comma-separated appointment input: Name, Age, Sex, Phone No
+ */
+const parseAppointmentDetails = (rawText) => {
+  const parts = String(rawText || "")
+    .split(",")
+    .map((p) => p.trim())
+    .filter((p) => p.length > 0);
+
+  if (parts.length !== 4) {
+    return { valid: false, reason: "Expected 4 comma-separated values: Name, Age, Sex, Phone No." };
+  }
+
+  const [name, ageRaw, sexRaw, phoneRaw] = parts;
+  const age = Number(ageRaw);
+  const sex = sexRaw.toUpperCase();
+  const phoneNo = phoneRaw.replace(/[^\d+]/g, "");
+  const digitsOnlyPhone = phoneNo.replace(/\D/g, "");
+
+  if (name.length < 2) {
+    return { valid: false, reason: "Please enter a valid Name." };
+  }
+  if (!Number.isInteger(age) || age <= 0 || age > 125) {
+    return { valid: false, reason: "Please enter a valid Age." };
+  }
+  if (!["M", "F", "O", "MALE", "FEMALE", "OTHER"].includes(sex)) {
+    return { valid: false, reason: "Please enter a valid Sex (e.g., Male, Female, Other)." };
+  }
+  if (digitsOnlyPhone.length < 7 || digitsOnlyPhone.length > 15) {
+    return { valid: false, reason: "Please enter a valid Phone No." };
+  }
+
+  return {
+    valid: true,
+    data: {
+      name,
+      age,
+      sex: sexRaw,
+      phoneNo,
+    },
+  };
+};
+
+/**
+ * Persist submitted appointment details in SQL Server
+ */
+/**
+ * Persist submitted appointment details using sp_Appointment (@mode = 'I')
+ */
+const saveAppointmentToDatabase = async (pool, senderPhone, details) => {
+  const Name = details?.name || null;
+  const Age = details?.age ?? null;
+  const Sex = details?.sex || null;
+  const Phone_No = details?.phoneNo || null;
+  const created_by = process.env.WHATSAPP_CREATED_BY || "WHATSAPP_BOT";
+
   try {
-    const pool = await connection.connectToDatabase();
+    const activePool = pool || (await connection.connectToDatabase());
 
-    // Search across both headers so it can find items whether they belong to ChatbotMenu or Plan
-    const result = await pool.request()
-      .input('detailCode', sql.VarChar, selectedCode)
-      .query(`
-        SELECT descriptions 
-        FROM tbl_attribute_details_info 
-        WHERE attributedetails_code = @detailCode
-      `);
+    await activePool
+      .request()
+      .input("mode", sql.NVarChar, "I")
+      .input("Name", sql.NVarChar, Name)
+      .input("Age", sql.Int, Age)
+      .input("Sex", sql.NVarChar, Sex)
+      .input("Phone_No", sql.NVarChar, Phone_No)
+      .input("created_by", sql.NVarChar, created_by)
+      .query(
+        `EXEC sp_Appointment @mode,'',0,@Name,@Age,@Sex,@Phone_No,@created_by,'','','','','','','','',''`
+      );
 
-    let responseText = "Invalid option selected.";
-
-    if (result.recordset.length > 0) {
-      responseText = result.recordset[0].descriptions + `\n\nType *'Menu'* to return to the main options or *'Plan'* for packages.`;
-    }
-
-    await sendTextMessage(recipientPhone, responseText);
+    return { success: true, message: "Appointment saved successfully" };
   } catch (err) {
-    console.error("Error fetching details:", err);
-    await sendTextMessage(recipientPhone, "An error occurred while fetching details. Please try again.");
+    console.error("Error inserting data:", err);
+    throw err;
   }
 };
 
 /**
- * Match typed text keywords against database service names or plans
+ * Handle user reply while awaiting Name, Age, Sex, Phone No
+ */
+const handleAppointmentSubmission = async (recipientPhone, textBody, session) => {
+  try {
+    const pool = await connection.connectToDatabase();
+    const parsed = parseAppointmentDetails(textBody);
+
+    if (!parsed.valid) {
+      const promptFromDb = await getDetailDescriptionFromDatabase(pool, "btn_appointment");
+      const formatInstruction =
+        promptFromDb ||
+        "Please share your details in the same comma-separated format as shown in the example below:\nExample: Rahul, 28, Male, 9876543210";
+
+      await sendTextMessage(
+        recipientPhone,
+        `Invalid format (${parsed.reason})\n\n${formatInstruction}`
+      );
+      return;
+    }
+
+    await saveAppointmentToDatabase(pool, recipientPhone, parsed.data);
+    session.step = "IDLE";
+
+    const confirmFromDb = await getDetailDescriptionFromDatabase(pool, "APPT_CONFIRM");
+    const thankYouMsg =
+      confirmFromDb ||
+      "Thank you! Your details have been received and we will contact you soon.";
+
+    await sendTextMessage(recipientPhone, thankYouMsg);
+  } catch (err) {
+    console.error("Error handling appointment submission:", err);
+    await sendTextMessage(
+      recipientPhone,
+      "An error occurred while saving your appointment details. Please try again."
+    );
+  }
+};
+
+/**
+ * Fetch specific details from DB based on user selection
+ */
+const handleDynamicDetailsResponse = async (recipientPhone, selectedCode, session) => {
+  try {
+    const pool = await connection.connectToDatabase();
+    const normalizedCode = String(selectedCode || "").trim();
+    const description = await getDetailDescriptionFromDatabase(pool, normalizedCode);
+
+    if (!description) {
+      await sendTextMessage(recipientPhone, "Invalid option selected.");
+      return;
+    }
+
+    // Appointment selection: ask for Name, Age, Sex, Phone No in comma-separated format
+    if (normalizedCode.toLowerCase() === "btn_appointment") {
+      if (session) {
+        session.step = "AWAITING_APPOINTMENT_DETAILS";
+      }
+
+      const appointmentPrompt = `${description}\n\nName, Age, Sex, Phone No\nPlease share the above details in the exact same order using commas (e.g., Arun, 32, Male, 9876543210).`;
+      await sendTextMessage(recipientPhone, appointmentPrompt);
+      return;
+    }
+
+    // Reports or other DB-configured selections
+    if (session) {
+      session.step = "IDLE";
+    }
+
+    // const responseText = `${description}\n\nType *'Menu'* to return to the main options or *'Plan'* for packages.`;
+    const responseText = `${description}`;
+    await sendTextMessage(recipientPhone, responseText);
+  } catch (err) {
+    console.error("Error fetching details:", err);
+    await sendTextMessage(
+      recipientPhone,
+      "An error occurred while fetching details. Please try again."
+    );
+  }
+};
+
+/**
+ * Match typed text keywords against database service names or codes
  */
 const matchKeywordFromDatabase = async (messageText) => {
   try {
     const pool = await connection.connectToDatabase();
 
-    const result = await pool.request()
-      .query(`
-        SELECT attributedetails_code, attributedetails_name 
-        FROM tbl_attribute_details_info
-      `);
+    const result = await pool.request().query(`
+      SELECT attributedetails_code, attributedetails_name
+      FROM tbl_attribute_details_info
+      WHERE attributedetails_code NOT LIKE 'CFG_%'
+        AND attributedetails_code <> 'APPT_CONFIRM'
+    `);
 
     for (const row of result.recordset) {
-      if (messageText.includes(row.attributedetails_name.toLowerCase())) {
+      const detailName = String(row.attributedetails_name || "").toLowerCase().trim();
+      if (detailName && messageText.includes(detailName)) {
         return row.attributedetails_code;
       }
     }
@@ -2927,44 +3369,105 @@ const matchKeywordFromDatabase = async (messageText) => {
   }
 };
 
-const checkAndLogUserSession = (phoneNumber) => {
-  const todayDateStr = new Date().toISOString().split('T')[0];
+const receiveWhatsAppMessage = async (req, res) => {
+  try {
+    const body = req.body;
 
-  if (currentStoredDate !== todayDateStr) {
-    dailyUserSessions.clear();
-    currentStoredDate = todayDateStr;
+    if (body.object === "whatsapp_business_account") {
+      const entry = body.entry?.[0];
+      const message = entry?.changes?.[0]?.value?.messages?.[0];
+
+      if (message) {
+        const senderPhone = message.from;
+        const { session, isFirstTimeToday } = getOrInitUserSession(senderPhone);
+
+        // Handle Interactive List / Button Selection
+        if (message.type === "interactive") {
+          const selectedId =
+            message.interactive?.list_reply?.id ||
+            message.interactive?.button_reply?.id;
+
+          console.log(`Selection by ${senderPhone}: ${selectedId}`);
+
+          if (selectedId === "btn_plans") {
+            session.step = "IDLE";
+            await sendDynamicListMenu(senderPhone, "Plan");
+          } else {
+            await handleDynamicDetailsResponse(senderPhone, selectedId, session);
+          }
+        }
+        // Handle Text Input
+        else if (message.type === "text") {
+          const rawText = message.text?.body || "";
+          const textMsg = rawText.toLowerCase().trim();
+
+          // Allow user to reset out of appointment capture using menu/plan/hi/hello
+          const isCommand =
+            textMsg.includes("menu") ||
+            textMsg.includes("hi") ||
+            textMsg.includes("hello") ||
+            textMsg.includes("plan") ||
+            textMsg.includes("package");
+
+          if (session.step === "AWAITING_APPOINTMENT_DETAILS" && !isCommand) {
+            await handleAppointmentSubmission(senderPhone, rawText, session);
+          } else if (textMsg.includes("menu") || textMsg.includes("hi") || textMsg.includes("hello")) {
+            session.step = "IDLE";
+            await sendDynamicListMenu(senderPhone, "ChatbotMenu");
+          } else if (textMsg.includes("plan") || textMsg.includes("package")) {
+            session.step = "IDLE";
+            await sendDynamicListMenu(senderPhone, "Plan");
+          } else if (isFirstTimeToday) {
+            await sendDynamicListMenu(senderPhone, "ChatbotMenu");
+          } else {
+            const matchedId = await matchKeywordFromDatabase(textMsg);
+            if (matchedId) {
+              if (matchedId === "btn_plans") {
+                session.step = "IDLE";
+                await sendDynamicListMenu(senderPhone, "Plan");
+              } else {
+                await handleDynamicDetailsResponse(senderPhone, matchedId, session);
+              }
+            } else {
+              await sendDynamicListMenu(senderPhone, "ChatbotMenu");
+            }
+          }
+        }
+      }
+
+      return res.sendStatus(200);
+    }
+
+    return res.sendStatus(404);
+  } catch (err) {
+    console.error("Webhook POST Error:", err);
+    return res.sendStatus(500);
   }
-
-  const lastActiveData = dailyUserSessions.get(phoneNumber);
-
-  if (lastActiveData !== todayDateStr) {
-    dailyUserSessions.set(phoneNumber, todayDateStr);
-    return true; // First message today!
-  }
-
-  return false; // Already messaged today
 };
 
 const sendTextMessage = async (recipientPhone, textResponse) => {
   const payload = {
     messaging_product: "whatsapp",
-    to: recipientPhone.replace(/\D/g, ''),
+    to: String(recipientPhone).replace(/\D/g, ""),
     type: "text",
-    text: { body: textResponse }
+    text: { body: textResponse },
   };
   await callWhatsAppApi(payload);
 };
 
 const callWhatsAppApi = async (payload) => {
   try {
-    const response = await fetch(`https://graph.facebook.com/v20.0/${PHONE_NUMBER_ID}/messages`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${ACCESS_TOKEN}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
+    const response = await fetch(
+      `https://graph.facebook.com/v20.0/${PHONE_NUMBER_ID}/messages`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${ACCESS_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      }
+    );
 
     const data = await response.json();
 
@@ -2978,7 +3481,7 @@ const callWhatsAppApi = async (payload) => {
     console.error("Error in callWhatsAppApi:", error.message || error);
   }
 };
-/* Code Added by Pavun on 2026-10-30 */
+/* Code Ended by Pavun on 21-11-2026 */
 
 module.exports = {
   login,
